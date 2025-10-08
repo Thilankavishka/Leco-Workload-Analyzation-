@@ -1,5 +1,5 @@
 import React from "react";
-import { Filter, ChevronDown } from "lucide-react";
+import { Filter, ChevronDown, Users, Car, Award, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import blockData from "@/data/block-data";
 
@@ -16,6 +16,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({
 }) => {
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Header */}
       <header className="bg-white shadow-sm border-b sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
@@ -31,7 +32,9 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({
         </div>
       </header>
 
+      {/* Main Content */}
       <main className="max-w-7xl mx-auto px-6 py-8">
+        {/* Block Selection */}
         <Card className="mb-8 shadow-md">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
@@ -67,61 +70,61 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({
           </CardContent>
         </Card>
 
+        {/* Stats Section */}
         {selectedBlock && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {/* Total Employees */}
             <Card className="shadow-md">
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-600 mb-1">
-                      Total Employees
-                    </p>
+                    <p className="text-sm text-gray-600 mb-1">Total Employees</p>
                     <p className="text-3xl font-bold text-gray-900">
                       {blockData[selectedBlock].employees}
                     </p>
                   </div>
+                  <Users className="w-10 h-10 text-blue-600" />
                 </div>
               </CardContent>
             </Card>
 
+            {/* Vehicles Assigned */}
             <Card className="shadow-md">
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-600 mb-1">
-                      Vehicles Assigned
-                    </p>
+                    <p className="text-sm text-gray-600 mb-1">Vehicles Assigned</p>
                     <p className="text-3xl font-bold text-gray-900">
                       {blockData[selectedBlock].vehicles}
                     </p>
                   </div>
+                  <Car className="w-10 h-10 text-green-600" />
                 </div>
               </CardContent>
             </Card>
 
+            {/* Tasks Completed */}
             <Card className="shadow-md">
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-600 mb-1">
-                      Tasks Completed
-                    </p>
+                    <p className="text-sm text-gray-600 mb-1">Tasks Completed</p>
                     <p className="text-3xl font-bold text-gray-900">
                       {blockData[selectedBlock].tasks.completed}/
                       {blockData[selectedBlock].tasks.total}
                     </p>
                   </div>
+                  <Award className="w-10 h-10 text-purple-600" />
                 </div>
               </CardContent>
             </Card>
 
+            {/* Completion Rate */}
             <Card className="shadow-md">
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-600 mb-1">
-                      Completion Rate
-                    </p>
+                    <p className="text-sm text-gray-600 mb-1">Completion Rate</p>
                     <p className="text-3xl font-bold text-gray-900">
                       {Math.round(
                         (blockData[selectedBlock].tasks.completed /
@@ -131,6 +134,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({
                       %
                     </p>
                   </div>
+                  <TrendingUp className="w-10 h-10 text-orange-600" />
                 </div>
               </CardContent>
             </Card>
