@@ -38,12 +38,14 @@ interface BlockDetailsProps {
   }) => void;
 }
 
+type PerformanceFilter = "today" | "lastDay" | "weekly" | "monthly" | "yearly";
+
 const BlockDetailsPage: React.FC<BlockDetailsProps> = ({
   onNavigate,
   selectedBlock,
   onViewEmployee,
 }) => {
-  const [performanceFilter, setPerformanceFilter] = useState("weekly");
+  const [performanceFilter, setPerformanceFilter] = useState<PerformanceFilter>("weekly");
 
   const block = selectedBlock ? blockData[selectedBlock] : null;
   if (!block) return null;
@@ -261,7 +263,7 @@ const BlockDetailsPage: React.FC<BlockDetailsProps> = ({
                 <div className="relative">
                   <select
                     value={performanceFilter}
-                    onChange={(e) => setPerformanceFilter(e.target.value)}
+                    onChange={(e) => setPerformanceFilter(e.target.value as PerformanceFilter)}
                     className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white pr-10"
                   >
                     <option value="today">Today</option>
