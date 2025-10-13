@@ -15,8 +15,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({
   setSelectedBlock,
 }) => {
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
       <header className="bg-white shadow-sm border-b sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
@@ -32,9 +31,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="max-w-7xl mx-auto px-6 py-8">
-        {/* Block Selection */}
         <Card className="mb-8 shadow-md">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
@@ -70,10 +67,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({
           </CardContent>
         </Card>
 
-        {/* Stats Section */}
         {selectedBlock && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {/* Total Employees */}
             <Card className="shadow-md">
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
@@ -88,7 +83,6 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({
               </CardContent>
             </Card>
 
-            {/* Vehicles Assigned */}
             <Card className="shadow-md">
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
@@ -103,7 +97,6 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({
               </CardContent>
             </Card>
 
-            {/* Tasks Completed */}
             <Card className="shadow-md">
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
@@ -119,7 +112,6 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({
               </CardContent>
             </Card>
 
-            {/* Completion Rate */}
             <Card className="shadow-md">
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
