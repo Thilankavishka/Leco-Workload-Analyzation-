@@ -91,8 +91,7 @@ const ComparisonPage: React.FC<ComparisonPageProps> = ({ onNavigate }) => {
       : [];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
       <header className="bg-white shadow-sm border-b sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <button
@@ -109,7 +108,6 @@ const ComparisonPage: React.FC<ComparisonPageProps> = ({ onNavigate }) => {
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-8">
-        {/* Block Selection */}
         <Card className="mb-8 shadow-md">
           <CardHeader>
             <CardTitle>Select Blocks to Compare</CardTitle>
@@ -145,7 +143,6 @@ const ComparisonPage: React.FC<ComparisonPageProps> = ({ onNavigate }) => {
 
         {comparisonBlocks.length > 0 ? (
           <>
-            {/* Comparison Bar Chart */}
             <Card className="mb-8 shadow-md">
               <CardHeader>
                 <CardTitle>Performance Comparison</CardTitle>
@@ -178,7 +175,6 @@ const ComparisonPage: React.FC<ComparisonPageProps> = ({ onNavigate }) => {
               </CardContent>
             </Card>
 
-            {/* Radar Chart */}
             <Card className="mb-8 shadow-md">
               <CardHeader>
                 <CardTitle>Multi-Dimensional Analysis</CardTitle>
@@ -220,7 +216,6 @@ const ComparisonPage: React.FC<ComparisonPageProps> = ({ onNavigate }) => {
               </CardContent>
             </Card>
 
-            {/* AI Insights Section */}
             <Card className="shadow-md">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">

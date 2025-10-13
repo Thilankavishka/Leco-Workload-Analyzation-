@@ -4,7 +4,9 @@ import {
   Car,
   Award,
   Phone,
-  Calendar,
+  ArrowRight,
+  Activity,
+  Search,
 } from "lucide-react";
 import {
   Card,
@@ -13,6 +15,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   BarChart,
   Bar,
@@ -23,6 +26,9 @@ import {
   LineChart,
   Line,
   ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
 } from "recharts";
 import blockData from "@/data/block-data";
 
@@ -35,294 +41,224 @@ interface BlockDetailsProps {
     phone: string;
     role: string;
     performance: number;
+    tasksCompleted: number;
+    tasksAssigned: number;
   }) => void;
 }
 
-type PerformanceFilter = "today" | "lastDay" | "weekly" | "monthly" | "yearly";
+const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
 
 const BlockDetailsPage: React.FC<BlockDetailsProps> = ({
   onNavigate,
   selectedBlock,
   onViewEmployee,
 }) => {
-  const [performanceFilter, setPerformanceFilter] = useState<PerformanceFilter>("weekly");
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   const block = selectedBlock ? blockData[selectedBlock] : null;
   if (!block) return null;
 
+  const filteredStaff = block.staff.filter((employee) =>
+    employee.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => onNavigate("analysis")}
-              className="text-blue-600 hover:text-blue-700 font-medium"
-            >
-              ← Back to Analysis
-            </button>
-            <h1 className="text-2xl font-bold text-gray-900">{block.name}</h1>
-            <button
-              onClick={() => onNavigate("comparison")}
-              className="px-6 py-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white rounded-lg font-semibold transition-all"
-            >
-              Deep Comparison
-            </button>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
+      <header className="bg-white shadow-sm border-b sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          <button
+            onClick={() => onNavigate("home")}
+            className="text-blue-600 hover:text-blue-700 font-medium flex items-center space-x-2"
+          >
+            <ArrowRight className="w-4 h-4 rotate-180" />
+            <span>Back to Dashboard</span>
+          </button>
+          <h1 className="text-2xl font-bold text-gray-900">{block.name}</h1>
+          <button
+            onClick={() => onNavigate("comparison")}
+            className="px-6 py-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white rounded-lg font-semibold transition-all"
+          >
+            Deep Comparison
+          </button>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-8">
-        {/* Overview Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="shadow-md">
+          <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg">
             <CardHeader>
               <CardTitle className="text-lg flex items-center space-x-2">
-                <Users className="w-5 h-5 text-blue-600" />
+                <Users className="w-5 h-5" />
                 <span>Total Employees</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-4xl font-bold text-gray-900">
-                {block.employees}
-              </p>
+              <p className="text-4xl font-bold">{block.employees}</p>
             </CardContent>
           </Card>
 
-          <Card className="shadow-md">
+          <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white shadow-lg">
             <CardHeader>
               <CardTitle className="text-lg flex items-center space-x-2">
-                <Car className="w-5 h-5 text-green-600" />
+                <Car className="w-5 h-5" />
                 <span>Vehicles</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-4xl font-bold text-gray-900">
-                {block.vehicles}
-              </p>
+              <p className="text-4xl font-bold">{block.vehicles}</p>
             </CardContent>
           </Card>
 
-          <Card className="shadow-md">
+          <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white shadow-lg">
             <CardHeader>
               <CardTitle className="text-lg flex items-center space-x-2">
-                <Award className="w-5 h-5 text-purple-600" />
+                <Award className="w-5 h-5" />
                 <span>Task Completion</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-4xl font-bold text-gray-900">
-                {Math.round(
-                  (block.tasks.completed / block.tasks.total) * 100
-                )}
-                %
+              <p className="text-4xl font-bold">
+                {Math.round((block.tasks.completed / block.tasks.total) * 100)}%
               </p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Employee Details Table */}
-        <Card className="mb-8 shadow-md">
+        <Card className="shadow-lg mb-8">
           <CardHeader>
-            <CardTitle>Employee Details</CardTitle>
+            <CardTitle className="flex items-center space-x-2">
+              <Activity className="w-6 h-6 text-blue-600" />
+              <span>Employee Performance Analytics</span>
+            </CardTitle>
             <CardDescription>
-              Complete staff information and contact details
+              Individual employee task completion and performance metrics
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b-2 border-gray-200">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                      Staff ID
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                      Name
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                      Role
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                      Phone Number
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                      Performance
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                      Action
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {block.staff.map((employee) => (
-                    <tr
-                      key={employee.id}
-                      className="hover:bg-gray-50 transition-colors"
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-4">
+                  Performance Comparison
+                </h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart
+                    data={block.staff.map((s) => ({
+                      name: s.name.split(" ")[0],
+                      performance: s.performance,
+                    }))}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis domain={[0, 100]} />
+                    <Tooltip formatter={(value) => `${value}%`} />
+                    <Bar
+                      dataKey="performance"
+                      fill="#3b82f6"
+                      radius={[8, 8, 0, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-4">
+                  Task Distribution
+                </h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={block.staff.map((s) => ({
+                        name: s.name.split(" ")[0],
+                        value: s.tasksCompleted,
+                      }))}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, percent }) =>
+                        `${name}: ${((percent as number) * 100).toFixed(0)}%`
+                      }
+                      outerRadius={100}
+                      fill="#8884d8"
+                      dataKey="value"
                     >
-                      <td className="px-4 py-4 text-sm font-medium text-gray-900">
-                        {employee.id}
-                      </td>
-                      <td className="px-4 py-4 text-sm text-gray-900">
-                        {employee.name}
-                      </td>
-                      <td className="px-4 py-4 text-sm text-gray-600">
-                        {employee.role}
-                      </td>
-                      <td className="px-4 py-4 text-sm text-gray-600 flex items-center space-x-2">
-                        <Phone className="w-4 h-4" />
-                        <span>{employee.phone}</span>
-                      </td>
-                      <td className="px-4 py-4 text-sm">
-                        <div className="flex items-center space-x-2">
-                          <div className="w-24 bg-gray-200 rounded-full h-2">
-                            <div
-                              className={`h-2 rounded-full ${
-                                employee.performance >= 90
-                                  ? "bg-green-500"
-                                  : employee.performance >= 80
-                                  ? "bg-blue-500"
-                                  : "bg-yellow-500"
-                              }`}
-                              style={{
-                                width: `${employee.performance}%`,
-                              }}
-                            />
-                          </div>
-                          <span className="font-semibold text-gray-700">
-                            {employee.performance}%
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-4 text-sm">
-                        <button
-                          onClick={() => onViewEmployee(employee)}
-                          className="text-blue-600 hover:text-blue-700 font-medium"
-                        >
-                          View Details
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                      {block.staff.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={COLORS[index % COLORS.length]}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div className="relative mb-6">
+              <Input
+                type="text"
+                placeholder="Search employees by name..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+              />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredStaff.map((employee) => (
+                <Card
+                  key={employee.id}
+                  className="shadow-md hover:shadow-lg transition-shadow cursor-pointer bg-gradient-to-r from-white to-blue-50"
+                  onClick={() => onViewEmployee(employee)}
+                >
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg font-bold text-gray-900 flex items-center space-x-2">
+                      <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                        {employee.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
+                      </div>
+                      <span>{employee.name}</span>
+                    </CardTitle>
+                    <CardDescription className="text-sm text-gray-600">
+                      {employee.role}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <p className="text-sm text-gray-600">Performance</p>
+                        <p className="text-xl font-bold text-blue-600">
+                          {employee.performance}%
+                        </p>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <p className="text-sm text-gray-600">Tasks Done</p>
+                        <p className="text-xl font-bold text-green-600">
+                          {employee.tasksCompleted}/{employee.tasksAssigned}
+                        </p>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <p className="text-sm text-gray-600">Success Rate</p>
+                        <p className="text-xl font-bold text-purple-600">
+                          {Math.round(
+                            (employee.tasksCompleted / employee.tasksAssigned) * 100
+                          )}%
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </CardContent>
         </Card>
 
-        {/* Visualizations Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          {/* Task Completion Bar Chart */}
-          <Card className="shadow-md">
-            <CardHeader>
-              <CardTitle>Task Overview</CardTitle>
-              <CardDescription>
-                Total tasks vs completed tasks
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart
-                  data={[
-                    {
-                      name: "Total Tasks",
-                      value: block.tasks.total,
-                      fill: "#3b82f6",
-                    },
-                    {
-                      name: "Completed",
-                      value: block.tasks.completed,
-                      fill: "#10b981",
-                    },
-                    {
-                      name: "Pending",
-                      value: block.tasks.total - block.tasks.completed,
-                      fill: "#f59e0b",
-                    },
-                  ]}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="value" radius={[8, 8, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-
-          {/* Performance Filter Visualization */}
-          <Card className="shadow-md">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Overall Performance</CardTitle>
-                  <CardDescription>Filter by time period</CardDescription>
-                </div>
-                <div className="relative">
-                  <select
-                    value={performanceFilter}
-                    onChange={(e) => setPerformanceFilter(e.target.value as PerformanceFilter)}
-                    className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white pr-10"
-                  >
-                    <option value="today">Today</option>
-                    <option value="lastDay">Last Day</option>
-                    <option value="weekly">Weekly</option>
-                    <option value="monthly">Monthly</option>
-                    <option value="yearly">Yearly</option>
-                  </select>
-                  <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col items-center justify-center h-64">
-                <div className="relative w-48 h-48">
-                  <svg className="w-full h-full transform -rotate-90">
-                    <circle
-                      cx="96"
-                      cy="96"
-                      r="88"
-                      stroke="#e5e7eb"
-                      strokeWidth="16"
-                      fill="none"
-                    />
-                    <circle
-                      cx="96"
-                      cy="96"
-                      r="88"
-                      stroke="#3b82f6"
-                      strokeWidth="16"
-                      fill="none"
-                      strokeDasharray={`${2 * Math.PI * 88}`}
-                      strokeDashoffset={`${
-                        2 *
-                        Math.PI *
-                        88 *
-                        (1 - block.performance[performanceFilter] / 100)
-                      }`}
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <p className="text-5xl font-bold text-gray-900">
-                      {block.performance[performanceFilter]}%
-                    </p>
-                    <p className="text-sm text-gray-600 mt-1 capitalize">
-                      {performanceFilter}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Weekly Performance Trend */}
-        <Card className="shadow-md">
+        <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle>Performance Trend</CardTitle>
+            <CardTitle>Block Performance Trend</CardTitle>
             <CardDescription>Weekly performance tracking</CardDescription>
           </CardHeader>
           <CardContent>

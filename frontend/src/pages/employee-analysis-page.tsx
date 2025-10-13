@@ -1,5 +1,6 @@
-import React from "react";
-import { Phone, Building2, Award, TrendingUp, UserCheck } from "lucide-react";
+// src/pages/employee-analysis-page.tsx
+import React, { useState } from "react";
+import { Phone, Building2, Award, TrendingUp, UserCheck, CheckCircle } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -8,15 +9,6 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-} from "recharts";
 import blockData from "@/data/block-data";
 
 interface EmployeeAnalysisProps {
@@ -28,6 +20,8 @@ interface EmployeeAnalysisProps {
     phone: string;
     role: string;
     performance: number;
+    tasksCompleted: number;
+    tasksAssigned: number;
   } | null;
   clearEmployee: () => void;
 }
@@ -38,12 +32,29 @@ const EmployeeAnalysisPage: React.FC<EmployeeAnalysisProps> = ({
   selectedEmployee,
   clearEmployee,
 }) => {
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
+
   if (!selectedBlock || !selectedEmployee) return null;
 
   const block = blockData[selectedBlock];
   const employee = selectedEmployee;
 
-  // Employee performance category
+  // Filter tasks assigned to the employee
+  const employeeTasks = block.ongoingTasks.filter((task) =>
+    task.assignedTo.includes(employee.id)
+  );
+
+  // Filter tasks by date range
+  const filteredTasks = employeeTasks.filter((task) => {
+    if (!startDate && !endDate) return true;
+    const taskStart = new Date(task.startDate);
+    const taskEnd = task.endDate ? new Date(task.endDate) : new Date();
+    const filterStart = startDate ? new Date(startDate) : new Date(0);
+    const filterEnd = endDate ? new Date(endDate) : new Date();
+    return taskStart >= filterStart && taskEnd <= filterEnd;
+  });
+
   const performanceCategory =
     employee.performance >= 90
       ? "Excellent"
@@ -62,11 +73,6 @@ const EmployeeAnalysisPage: React.FC<EmployeeAnalysisProps> = ({
       ? "text-yellow-600"
       : "text-red-600";
 
-  // Team comparison data
-  const employeeComparison = block.staff.map((emp) => ({
-    name: emp.name.split(" ")[0],
-    performance: emp.performance,
-  }));
 
   const teamAverage =
     block.staff.reduce((acc, e) => acc + e.performance, 0) /
@@ -79,8 +85,7 @@ const EmployeeAnalysisPage: React.FC<EmployeeAnalysisProps> = ({
       .indexOf(employee.performance) + 1;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
       <header className="bg-white shadow-sm border-b sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <button
@@ -100,7 +105,6 @@ const EmployeeAnalysisPage: React.FC<EmployeeAnalysisProps> = ({
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-8">
-        {/* Employee Profile */}
         <Card className="mb-8 shadow-md">
           <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
             <div className="flex items-center justify-between">
@@ -144,96 +148,107 @@ const EmployeeAnalysisPage: React.FC<EmployeeAnalysisProps> = ({
           </CardContent>
         </Card>
 
-        {/* Performance & Team Comparison */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          {/* Circular Performance */}
-          <Card className="shadow-md">
-            <CardHeader>
-              <CardTitle>Individual Performance</CardTitle>
-              <CardDescription>Current performance assessment</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col items-center justify-center py-8">
-                <div className="relative w-56 h-56">
-                  <svg className="w-full h-full transform -rotate-90">
-                    <circle
-                      cx="112"
-                      cy="112"
-                      r="100"
-                      stroke="#e5e7eb"
-                      strokeWidth="20"
-                      fill="none"
-                    />
-                    <circle
-                      cx="112"
-                      cy="112"
-                      r="100"
-                      stroke={
-                        employee.performance >= 90
-                          ? "#10b981"
-                          : employee.performance >= 80
-                          ? "#3b82f6"
-                          : employee.performance >= 70
-                          ? "#f59e0b"
-                          : "#ef4444"
-                      }
-                      strokeWidth="20"
-                      fill="none"
-                      strokeDasharray={`${2 * Math.PI * 100}`}
-                      strokeDashoffset={`${
-                        2 * Math.PI * 100 * (1 - employee.performance / 100)
-                      }`}
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <p className="text-6xl font-bold text-gray-900">
-                      {employee.performance}%
-                    </p>
-                    <p className={`text-lg font-semibold mt-2 ${categoryColor}`}>
-                      {performanceCategory}
-                    </p>
-                  </div>
-                </div>
+        {/* Task List with Date Filter */}
+        <Card className="mb-8 shadow-md">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <CheckCircle className="w-6 h-6 text-blue-600" />
+              <span>Assigned Tasks</span>
+            </CardTitle>
+            <CardDescription>
+              Tasks assigned to {employee.name} with progress and status
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {/* Date Range Filter */}
+            <div className="flex flex-col sm:flex-row gap-4 mb-6">
+              <div>
+                <label className="text-sm text-gray-600 mr-2">Start Date:</label>
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
               </div>
-            </CardContent>
-          </Card>
+              <div>
+                <label className="text-sm text-gray-600 mr-2">End Date:</label>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
 
-          {/* Team Bar Chart */}
-          <Card className="shadow-md">
-            <CardHeader>
-              <CardTitle>Team Comparison</CardTitle>
-              <CardDescription>
-                Performance relative to {block.name.split(" - ")[0]} team members
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={employeeComparison}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis domain={[0, 100]} />
-                  <Tooltip formatter={(value) => `${value}%`} />
-                  <Bar dataKey="performance" radius={[8, 8, 0, 0]}>
-                    {employeeComparison.map((entry, index) => (
-                      <Bar
-                        key={index}
-                        dataKey="performance"
-                        fill={
-                          entry.name === employee.name.split(" ")[0]
-                            ? "#3b82f6"
-                            : "#94a3b8"
-                        }
-                      />
+            {/* Task Table */}
+            {filteredTasks.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-gray-100">
+                      <th className="p-3 text-sm font-semibold text-gray-900">Task Name</th>
+                      <th className="p-3 text-sm font-semibold text-gray-900">Progress</th>
+                      <th className="p-3 text-sm font-semibold text-gray-900">Priority</th>
+                      <th className="p-3 text-sm font-semibold text-gray-900">Status</th>
+                      <th className="p-3 text-sm font-semibold text-gray-900">Start Date</th>
+                      <th className="p-3 text-sm font-semibold text-gray-900">End Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredTasks.map((task) => (
+                      <tr
+                        key={task.id}
+                        className="border-b border-gray-200 hover:bg-blue-50 transition-colors"
+                      >
+                        <td className="p-3 text-sm text-gray-900">{task.name}</td>
+                        <td className="p-3">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-32 bg-gray-200 rounded-full h-2">
+                              <div
+                                className="bg-blue-500 h-2 rounded-full"
+                                style={{ width: `${task.progress}%` }}
+                              />
+                            </div>
+                            <span className="text-sm font-semibold text-gray-700">
+                              {task.progress}%
+                            </span>
+                          </div>
+                        </td>
+                        <td className="p-3">
+                          <span
+                            className={`px-2 py-1 rounded text-xs font-semibold ${
+                              task.priority === "high"
+                                ? "bg-red-100 text-red-700"
+                                : task.priority === "medium"
+                                ? "bg-yellow-100 text-yellow-700"
+                                : "bg-green-100 text-green-700"
+                            }`}
+                          >
+                            {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+                          </span>
+                        </td>
+                        <td className="p-3 text-sm text-gray-900">
+                          {task.progress === 100 ? "Completed" : "Ongoing"}
+                        </td>
+                        <td className="p-3 text-sm text-gray-900">{task.startDate}</td>
+                        <td className="p-3 text-sm text-gray-900">
+                          {task.endDate || "Ongoing"}
+                        </td>
+                      </tr>
                     ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </div>
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="text-gray-600 text-center">
+                No tasks found for the selected date range.
+              </p>
+            )}
+          </CardContent>
+        </Card>
 
-        {/* Detailed Analysis & Recommendations */}
         <Card className="shadow-md">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
@@ -242,7 +257,6 @@ const EmployeeAnalysisPage: React.FC<EmployeeAnalysisProps> = ({
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Performance Summary */}
             <div>
               <h3 className="font-semibold text-lg mb-3 text-gray-900">
                 📊 Performance Summary
@@ -264,7 +278,6 @@ const EmployeeAnalysisPage: React.FC<EmployeeAnalysisProps> = ({
               </div>
             </div>
 
-            {/* Strengths */}
             <div>
               <h3 className="font-semibold text-lg mb-3 text-gray-900">
                 💪 Key Strengths
@@ -292,7 +305,6 @@ const EmployeeAnalysisPage: React.FC<EmployeeAnalysisProps> = ({
               </ul>
             </div>
 
-            {/* Development Areas */}
             <div>
               <h3 className="font-semibold text-lg mb-3 text-gray-900">
                 🎯 Development Areas
@@ -320,7 +332,6 @@ const EmployeeAnalysisPage: React.FC<EmployeeAnalysisProps> = ({
               </ul>
             </div>
 
-            {/* Recommended Actions */}
             <div>
               <h3 className="font-semibold text-lg mb-3 text-gray-900">
                 ✅ Recommended Actions
