@@ -1,9 +1,9 @@
 import React, { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Users,
   Car,
   Award,
-  Phone,
   ArrowRight,
   Activity,
   Search,
@@ -32,30 +32,14 @@ import {
 } from "recharts";
 import blockData from "@/data/block-data";
 
-interface BlockDetailsProps {
-  onNavigate: (page: string) => void;
-  selectedBlock: string | null;
-  onViewEmployee: (employee: {
-    id: string;
-    name: string;
-    phone: string;
-    role: string;
-    performance: number;
-    tasksCompleted: number;
-    tasksAssigned: number;
-  }) => void;
-}
-
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
 
-const BlockDetailsPage: React.FC<BlockDetailsProps> = ({
-  onNavigate,
-  selectedBlock,
-  onViewEmployee,
-}) => {
+const BlockDetailsPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { blockId } = useParams<{ blockId: string }>();
   const [searchTerm, setSearchTerm] = useState<string>("");
 
-  const block = selectedBlock ? blockData[selectedBlock] : null;
+  const block = blockId ? blockData[blockId] : null;
   if (!block) return null;
 
   const filteredStaff = block.staff.filter((employee) =>
@@ -67,7 +51,7 @@ const BlockDetailsPage: React.FC<BlockDetailsProps> = ({
       <header className="bg-white shadow-sm border-b sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <button
-            onClick={() => onNavigate("home")}
+            onClick={() => navigate("/")}
             className="text-blue-600 hover:text-blue-700 font-medium flex items-center space-x-2"
           >
             <ArrowRight className="w-4 h-4 rotate-180" />
@@ -75,7 +59,7 @@ const BlockDetailsPage: React.FC<BlockDetailsProps> = ({
           </button>
           <h1 className="text-2xl font-bold text-gray-900">{block.name}</h1>
           <button
-            onClick={() => onNavigate("comparison")}
+            onClick={() => navigate("/comparison")}
             className="px-6 py-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white rounded-lg font-semibold transition-all"
           >
             Deep Comparison
@@ -181,7 +165,7 @@ const BlockDetailsPage: React.FC<BlockDetailsProps> = ({
                       fill="#8884d8"
                       dataKey="value"
                     >
-                      {block.staff.map((entry, index) => (
+                      {block.staff.map((_, index) => (
                         <Cell
                           key={`cell-${index}`}
                           fill={COLORS[index % COLORS.length]}
@@ -210,7 +194,7 @@ const BlockDetailsPage: React.FC<BlockDetailsProps> = ({
                 <Card
                   key={employee.id}
                   className="shadow-md hover:shadow-lg transition-shadow cursor-pointer bg-gradient-to-r from-white to-blue-50"
-                  onClick={() => onViewEmployee(employee)}
+                  onClick={() => navigate(`/block/${blockId}/employee/${employee.id}`)}
                 >
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg font-bold text-gray-900 flex items-center space-x-2">
