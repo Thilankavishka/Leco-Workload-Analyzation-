@@ -6,6 +6,7 @@ import {
   Users,
   Activity,
   Search,
+  ArrowRight,
 } from "lucide-react";
 import {
   Card,
@@ -27,6 +28,7 @@ import {
 } from "recharts";
 import blockData from "@/data/block-data";
 import DashboardCard from "@/components/dashboard-card";
+import { Button } from "@/components/ui/button";
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -133,6 +135,16 @@ const HomePage: React.FC = () => {
               gradientTo={card.gradientTo}
             />
           ))}
+        </div>
+
+        <div className="flex justify-center mb-6">
+          <Button
+            onClick={() => navigate("/analysis")}
+            className="flex items-center space-x-2 bg-blue-700 backdrop-blur-md hover:bg-blue-600 text-white font-semibold shadow-md hover:shadow-lg transition-all rounded-xl px-6 py-3"
+          >
+            <span>Go to Analysis Page</span>
+            <ArrowRight className="w-5 h-5" />
+          </Button>
         </div>
 
         <Card className="shadow-lg mb-8">
