@@ -5,7 +5,7 @@ import blockData from "@/data/block-data";
 import { PerformanceAlert } from "@/components/comparison/performance-alert";
 import { PerformanceBarChart } from "@/components/comparison/performance-bar-chart";
 import { RadarComparisonChart } from "@/components/comparison/radar-comparison-chart";
-import { BlockSelector } from "@/components/comparison/Block-selector";
+import { BlockSelector } from "@/components/comparison/block-selector";
 
 const ComparisonPage: React.FC = () => {
   const navigate = useNavigate();
