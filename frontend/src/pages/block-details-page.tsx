@@ -94,7 +94,6 @@ const BlockDetailsPage: React.FC = () => {
         </div>
       </header>
 
-      {/* Main */}
       <main className="max-w-7xl mx-auto px-6 py-8">
         {/* Metrics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -128,6 +127,7 @@ const BlockDetailsPage: React.FC = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {/* Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
               {/* Performance Comparison BarChart */}
               <div>
@@ -169,10 +169,7 @@ const BlockDetailsPage: React.FC = () => {
                       dataKey="value"
                     >
                       {block.staff.map((_, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={COLORS[index % COLORS.length]}
-                        />
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
                     <Tooltip />
@@ -194,7 +191,7 @@ const BlockDetailsPage: React.FC = () => {
             </div>
 
             {/* Employee Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               {filteredStaff.map((employee) => {
                 const successRate = Math.round(
                   (employee.tasksCompleted / employee.tasksAssigned) * 100
@@ -203,15 +200,16 @@ const BlockDetailsPage: React.FC = () => {
                   .split(" ")
                   .map((n) => n[0])
                   .join("");
+
                 return (
                   <Card
                     key={employee.id}
-                    className="shadow-md hover:shadow-lg transition-shadow cursor-pointer bg-gradient-to-r from-white to-blue-50"
                     onClick={() =>
                       navigate(`/block/${blockId}/employee/${employee.id}`)
                     }
+                    className="cursor-pointer rounded-3xl shadow-lg backdrop-blur-sm bg-white/50 hover:shadow-2xl transition-all"
                   >
-                    <CardHeader className="pb-3">
+                    <CardHeader className="pb-2">
                       <CardTitle className="text-lg font-bold text-gray-900 flex items-center space-x-2">
                         <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
                           {initials}
@@ -222,23 +220,35 @@ const BlockDetailsPage: React.FC = () => {
                         {employee.role}
                       </CardDescription>
                     </CardHeader>
+
                     <CardContent>
-                      <div className="space-y-3">
-                        <div className="flex justify-between items-center">
-                          <p className="text-sm text-gray-600">Performance</p>
-                          <p className="text-xl font-bold text-blue-600">
+                      <div className="flex flex-col md:flex-row gap-2">
+                        {/* Performance */}
+                        <div className="flex-1 bg-blue-50/50 border border-blue-100 rounded-2xl p-4 flex flex-col items-center justify-center">
+                          <p className="text-sm text-blue-600 font-medium text-center">
+                            Performance
+                          </p>
+                          <p className="text-2xl font-bold text-blue-700">
                             {employee.performance}%
                           </p>
                         </div>
-                        <div className="flex justify-between items-center">
-                          <p className="text-sm text-gray-600">Tasks Done</p>
-                          <p className="text-xl font-bold text-green-600">
+
+                        {/* Tasks Done */}
+                        <div className="flex-1 bg-green-50/50 border border-green-100 rounded-2xl p-4 flex flex-col items-center justify-center">
+                          <p className="text-sm text-green-600 font-medium text-center">
+                            Tasks Done
+                          </p>
+                          <p className="text-2xl font-bold text-green-700">
                             {employee.tasksCompleted}/{employee.tasksAssigned}
                           </p>
                         </div>
-                        <div className="flex justify-between items-center">
-                          <p className="text-sm text-gray-600">Success Rate</p>
-                          <p className="text-xl font-bold text-purple-600">
+
+                        {/* Success Rate */}
+                        <div className="flex-1 bg-purple-50/50 border border-purple-100 rounded-2xl p-4 flex flex-col items-center justify-center">
+                          <p className="text-sm text-purple-600 font-medium text-center">
+                            Success Rate
+                          </p>
+                          <p className="text-2xl font-bold text-purple-700">
                             {successRate}%
                           </p>
                         </div>
@@ -250,6 +260,51 @@ const BlockDetailsPage: React.FC = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Task List Section */}
+        <div className="mb-8">
+          <h3 className="text-xl font-semibold text-gray-900 mb-4">Ongoing Tasks</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {block.ongoingTasks.map((task) => (
+              <Card
+                key={task.id}
+                className="cursor-pointer hover:shadow-lg transition-shadow"
+                onClick={() => navigate(`/block/${blockId}/task/${task.id}`)}
+              >
+                <CardHeader>
+                  <CardTitle className="text-lg font-bold">{task.name}</CardTitle>
+                  <CardDescription>
+                    Assigned to {task.assignedTo.length} employee{task.assignedTo.length > 1 ? 's' : ''}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex justify-between items-center">
+                    <p className="text-sm text-gray-600">Progress</p>
+                    <p className="font-semibold text-blue-600">{task.progress}%</p>
+                  </div>
+                  <div className="flex justify-between items-center mt-1">
+                    <p className="text-sm text-gray-600">Priority</p>
+                    <span
+                      className={`px-2 py-1 rounded text-xs font-semibold ${task.priority === "high"
+                        ? "bg-red-100 text-red-700"
+                        : task.priority === "medium"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : "bg-green-100 text-green-700"
+                        }`}
+                    >
+                      {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center mt-1 text-gray-500 text-sm">
+                    <p>Start: {task.startDate}</p>
+                    <p>End: {task.endDate || "Ongoing"}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
 
         {/* Block Performance Trend LineChart */}
         <Card className="shadow-lg">
