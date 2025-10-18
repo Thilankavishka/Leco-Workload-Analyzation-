@@ -2,7 +2,7 @@ import React from "react";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { TrendingUp } from "lucide-react";
-import type { Block, Employee } from "@/lib/type";
+import type { Block, Employee } from "@/common/type";
 
 interface PerformanceProps {
   block: Block;
