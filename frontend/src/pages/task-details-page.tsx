@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Card,
   CardHeader,
@@ -18,32 +19,15 @@ import {
 } from "recharts";
 import blockData from "@/data/block-data";
 
-interface TaskDetailsProps {
-  onNavigate: (page: string) => void;
-  selectedBlock: string | null;
-  selectedTask: { taskId: string; blockId: string } | null;
-  onViewEmployee: (employee: {
-    id: string;
-    name: string;
-    phone: string;
-    role: string;
-    performance: number;
-    tasksCompleted: number;
-    tasksAssigned: number;
-  }) => void;
-}
+const TaskDetailsPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { blockId, taskId } = useParams<{ blockId: string; taskId: string }>();
 
-const TaskDetailsPage: React.FC<TaskDetailsProps> = ({
-  onNavigate,
-  selectedBlock,
-  selectedTask,
-  onViewEmployee,
-}) => {
-  if (!selectedBlock || !selectedTask) return null;
+  if (!blockId || !taskId) return null;
 
-  const block = blockData[selectedBlock];
-  const task = block.ongoingTasks.find((t) => t.id === selectedTask.taskId);
-  if (!task) return null;
+  const block = blockData[blockId];
+  const task = block?.ongoingTasks.find((t) => t.id === taskId);
+  if (!block || !task) return null;
 
   const assignedEmployees = task.assignedTo
     .map((empId) => block.staff.find((emp) => emp.id === empId))
@@ -59,7 +43,7 @@ const TaskDetailsPage: React.FC<TaskDetailsProps> = ({
       <header className="bg-white shadow-sm border-b sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <button
-            onClick={() => onNavigate("home")}
+            onClick={() => navigate("/")}
             className="text-blue-600 hover:text-blue-700 font-medium flex items-center space-x-2"
           >
             <ArrowRight className="w-4 h-4 rotate-180" />
@@ -128,7 +112,7 @@ const TaskDetailsPage: React.FC<TaskDetailsProps> = ({
               {assignedEmployees.map((employee) => (
                 <div
                   key={employee.id}
-                  onClick={() => onViewEmployee(employee)}
+                  onClick={() => navigate(`/block/${blockId}/employee/${employee.id}`)}
                   className="border-2 border-gray-200 rounded-lg p-6 hover:border-blue-500 hover:shadow-lg transition-all cursor-pointer bg-white"
                 >
                   <div className="flex justify-between items-start">
