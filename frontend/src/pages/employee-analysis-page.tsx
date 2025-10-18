@@ -4,7 +4,7 @@ import blockData from "@/data/block-data";
 import { EmployeeTasks } from "@/components/employee-analysis/employee-tasks";
 import { EmployeeInfo } from "@/components/employee-analysis/employee-info";
 import { EmployeePerformanceSummary } from "@/components/employee-analysis/employee-performance-summary";
-import type { Block, Employee } from "@/lib/type";
+import type { Block, Employee } from "@/common/type";
 
 const EmployeeAnalysisPage: React.FC = () => {
   const navigate = useNavigate();
