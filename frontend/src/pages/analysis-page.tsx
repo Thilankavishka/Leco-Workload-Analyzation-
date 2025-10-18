@@ -1,26 +1,20 @@
-import React from "react";
+import React, { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { Filter, ChevronDown, Users, Car, Award, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import blockData from "@/data/block-data";
 
-interface AnalysisPageProps {
-  onNavigate: (page: string) => void;
-  selectedBlock: string | null;
-  setSelectedBlock: (id: string | null) => void;
-}
-
-const AnalysisPage: React.FC<AnalysisPageProps> = ({
-  onNavigate,
-  selectedBlock,
-  setSelectedBlock,
-}) => {
+const AnalysisPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { blockId } = useParams<{ blockId?: string }>();
+  const [selectedBlock, setSelectedBlock] = useState<string | null>(blockId || null);
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
       <header className="bg-white shadow-sm border-b sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <button
-              onClick={() => onNavigate("home")}
+              onClick={() => navigate("/")}
               className="text-blue-600 hover:text-blue-700 font-medium flex items-center space-x-2"
             >
               <span>← Back to Dashboard</span>
@@ -57,7 +51,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({
                 <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
               </div>
               <button
-                onClick={() => selectedBlock && onNavigate("blockDetails")}
+                onClick={() => selectedBlock && navigate(`/block/${selectedBlock}`)}
                 disabled={!selectedBlock}
                 className="px-8 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg font-semibold transition-colors"
               >
