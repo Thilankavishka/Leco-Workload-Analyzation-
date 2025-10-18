@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Card,
   CardHeader,
@@ -25,11 +26,8 @@ import { TrendingUp } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import blockData from "@/data/block-data";
 
-interface ComparisonPageProps {
-  onNavigate?: (page: string) => void;
-}
-
-const ComparisonPage: React.FC<ComparisonPageProps> = ({ onNavigate }) => {
+const ComparisonPage: React.FC = () => {
+  const navigate = useNavigate();
   const [comparisonBlocks, setComparisonBlocks] = useState<string[]>([]);
 
   const handleBlockToggle = (blockId: string) => {
@@ -95,7 +93,7 @@ const ComparisonPage: React.FC<ComparisonPageProps> = ({ onNavigate }) => {
       <header className="bg-white shadow-sm border-b sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <button
-            onClick={() => onNavigate?.("blockDetails")}
+            onClick={() => navigate(-1)}
             className="text-blue-600 hover:text-blue-700 font-medium"
           >
             ← Back to Block Details
