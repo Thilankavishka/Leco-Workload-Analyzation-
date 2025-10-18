@@ -1,5 +1,6 @@
 // src/pages/employee-analysis-page.tsx
 import React, { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { Phone, Building2, Award, TrendingUp, UserCheck, CheckCircle } from "lucide-react";
 import {
   Card,
@@ -11,34 +12,18 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import blockData from "@/data/block-data";
 
-interface EmployeeAnalysisProps {
-  onNavigate: (page: string) => void;
-  selectedBlock: string | null;
-  selectedEmployee: {
-    id: string;
-    name: string;
-    phone: string;
-    role: string;
-    performance: number;
-    tasksCompleted: number;
-    tasksAssigned: number;
-  } | null;
-  clearEmployee: () => void;
-}
-
-const EmployeeAnalysisPage: React.FC<EmployeeAnalysisProps> = ({
-  onNavigate,
-  selectedBlock,
-  selectedEmployee,
-  clearEmployee,
-}) => {
+const EmployeeAnalysisPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { blockId, employeeId } = useParams<{ blockId: string; employeeId: string }>();
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
 
-  if (!selectedBlock || !selectedEmployee) return null;
+  if (!blockId || !employeeId) return null;
 
-  const block = blockData[selectedBlock];
-  const employee = selectedEmployee;
+  const block = blockData[blockId];
+  const employee = block?.staff.find(e => e.id === employeeId);
+
+  if (!block || !employee) return null;
 
   // Filter tasks assigned to the employee
   const employeeTasks = block.ongoingTasks.filter((task) =>
@@ -89,10 +74,7 @@ const EmployeeAnalysisPage: React.FC<EmployeeAnalysisProps> = ({
       <header className="bg-white shadow-sm border-b sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <button
-            onClick={() => {
-              clearEmployee();
-              onNavigate("blockDetails");
-            }}
+            onClick={() => navigate(`/block/${blockId}`)}
             className="text-blue-600 hover:text-blue-700 font-medium"
           >
             ← Back to Block Details
