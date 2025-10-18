@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Building2,
   Award,
@@ -25,14 +26,10 @@ import {
   Legend,
 } from "recharts";
 import blockData from "@/data/block-data";
+import DashboardCard from "@/components/dashboard-card";
 
-interface HomePageProps {
-  onNavigate: (page: string) => void;
-  setSelectedBlock: (blockId: string) => void;
-  setSelectedTask: (taskId: string, blockId: string) => void;
-}
-
-const HomePage: React.FC<HomePageProps> = ({ onNavigate, setSelectedBlock,  }) => {
+const HomePage: React.FC = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState<string>("");
 
   const dashboardData = {
@@ -63,14 +60,47 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate, setSelectedBlock,  }) =
   );
 
   const handleBlockClick = (blockId: string) => {
-    setSelectedBlock(blockId);
-    onNavigate("blockDetails");
+    navigate(`/block/${blockId}`);
   };
-
 
   const filteredBlocks = Object.entries(blockData).filter(([, block]) =>
     block.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const cardsData = [
+    {
+      title: "Total Blocks",
+      value: dashboardData.totalBlocks,
+      description: "Active operational blocks",
+      icon: <Building2 className="w-6 h-6" />,
+      gradientFrom: "from-blue-500",
+      gradientTo: "to-blue-600",
+    },
+    {
+      title: "Total Tasks",
+      value: `${completedTasks}/${totalTasks}`,
+      description: `${Math.round((completedTasks / totalTasks) * 100)}% completion rate`,
+      icon: <Activity className="w-6 h-6" />,
+      gradientFrom: "from-green-500",
+      gradientTo: "to-green-600",
+    },
+    {
+      title: "Total Employees",
+      value: totalEmployees,
+      description: "Active workforce",
+      icon: <Users className="w-6 h-6" />,
+      gradientFrom: "from-purple-500",
+      gradientTo: "to-purple-600",
+    },
+    {
+      title: "Completed Projects",
+      value: dashboardData.completedProjects,
+      description: "Successfully delivered",
+      icon: <Award className="w-6 h-6" />,
+      gradientFrom: "from-orange-500",
+      gradientTo: "to-orange-600",
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
@@ -92,68 +122,17 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate, setSelectedBlock,  }) =
 
       <main className="max-w-7xl mx-auto px-6 py-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg hover:shadow-xl transition-shadow">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex justify-between items-center text-lg">
-                <span>Total Blocks</span>
-                <Building2 className="w-6 h-6" />
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-4xl font-bold">{dashboardData.totalBlocks}</p>
-              <p className="text-blue-100 text-sm mt-2">
-                Active operational blocks
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white shadow-lg hover:shadow-xl transition-shadow">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex justify-between items-center text-lg">
-                <span>Total Tasks</span>
-                <Activity className="w-6 h-6" />
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-4xl font-bold">
-                {completedTasks}/{totalTasks}
-              </p>
-              <p className="text-green-100 text-sm mt-2">
-                {Math.round((completedTasks / totalTasks) * 100)}% completion
-                rate
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white shadow-lg hover:shadow-xl transition-shadow">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex justify-between items-center text-lg">
-                <span>Total Employees</span>
-                <Users className="w-6 h-6" />
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-4xl font-bold">{totalEmployees}</p>
-              <p className="text-purple-100 text-sm mt-2">Active workforce</p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg hover:shadow-xl transition-shadow">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex justify-between items-center text-lg">
-                <span>Completed Projects</span>
-                <Award className="w-6 h-6" />
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-4xl font-bold">
-                {dashboardData.completedProjects}
-              </p>
-              <p className="text-orange-100 text-sm mt-2">
-                Successfully delivered
-              </p>
-            </CardContent>
-          </Card>
+          {cardsData.map((card, index) => (
+            <DashboardCard
+              key={index}
+              title={card.title}
+              value={card.value}
+              description={card.description}
+              icon={card.icon}
+              gradientFrom={card.gradientFrom}
+              gradientTo={card.gradientTo}
+            />
+          ))}
         </div>
 
         <Card className="shadow-lg mb-8">
