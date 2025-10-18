@@ -305,7 +305,6 @@ const BlockDetailsPage: React.FC = () => {
           </div>
         </div>
 
-
         {/* Block Performance Trend LineChart */}
         <Card className="shadow-lg">
           <CardHeader>
