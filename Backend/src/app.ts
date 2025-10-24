@@ -8,8 +8,8 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
-app.use('/api/logs', logsRoute);
-app.use('/api/performance', performanceRoute);
+app.use('/logs', logsRoute);
+app.use('/performance', performanceRoute);
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

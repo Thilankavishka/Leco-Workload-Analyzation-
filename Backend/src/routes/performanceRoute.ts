@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { analyzeTeamPerformance, getTopTeams } from '../controllers/performanceController';
+import { analyzeTeamPerformance, getTopTeams, analyzePerformanceByWorkType } from '../controllers/performanceController';
 
 const router = Router();
 
@@ -8,5 +8,8 @@ router.get('/analysis', analyzeTeamPerformance);
 
 // GET top 3 performing teams
 router.get('/top', getTopTeams);
+
+// Analyze by work type
+router.get('/work-type', analyzePerformanceByWorkType);
 
 export default router;
