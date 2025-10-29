@@ -6,7 +6,7 @@
 
     /* === Environment === */
     "target": "es2020",
-    "module": "commonjs",
+    "module": "Node16",
     "lib": ["esnext"],
     "types": ["node"],
 
@@ -31,7 +31,7 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
-    "moduleResolution": "node"
+    "moduleResolution": "node16"
   },
   "include": ["src", "types"], 
   "exclude": ["node_modules"]
