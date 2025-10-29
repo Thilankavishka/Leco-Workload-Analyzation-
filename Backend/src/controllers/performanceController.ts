@@ -1,10 +1,7 @@
 import { Request, Response } from 'express';
 import pool from '../db';
 
-/**
- * Analyze team performance based on cost efficiency and time management
- * Returns average cost, efficiency, and time metrics per team.
- */
+// ✅ Analyze full team performance
 export const analyzeTeamPerformance = async (_req: Request, res: Response) => {
   try {
     const [rows] = await pool.query(`
@@ -32,9 +29,7 @@ export const analyzeTeamPerformance = async (_req: Request, res: Response) => {
   }
 };
 
-/**
- * Get top performing teams (e.g., Top 3)
- */
+// ✅ Get Top 3 performing teams
 export const getTopTeams = async (_req: Request, res: Response) => {
   try {
     const [rows] = await pool.query(`
@@ -57,6 +52,7 @@ export const getTopTeams = async (_req: Request, res: Response) => {
   }
 };
 
+// ✅ Analyze by specific work type
 export const analyzePerformanceByWorkType = async (req: Request, res: Response) => {
   const workType = req.query.work_type as string;
 

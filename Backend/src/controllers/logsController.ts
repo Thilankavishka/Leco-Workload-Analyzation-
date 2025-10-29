@@ -12,6 +12,7 @@ interface LogRow extends RowDataPacket {
   time_taken: number;
 }
 
+// ✅ GET logs (by team or log ID)
 export const getLogs = async (req: Request, res: Response) => {
   const { team_id, log_id } = req.query;
 
@@ -27,13 +28,9 @@ export const getLogs = async (req: Request, res: Response) => {
       params.push(Number(log_id));
     }
 
-    const [rows] = await pool.query<LogRow[]>(query, params); // rows is now typed
+    const [rows] = await pool.query<LogRow[]>(query, params);
     res.json(rows);
   } catch (error: unknown) {
-    if (error instanceof Error) {
-      res.status(500).json({ error: error.message });
-    } else {
-      res.status(500).json({ error: String(error) });
-    }
+    res.status(500).json({ error: (error as Error).message });
   }
 };

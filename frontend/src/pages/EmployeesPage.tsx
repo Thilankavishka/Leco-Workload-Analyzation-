@@ -16,18 +16,19 @@ function EmployeesPage() {
   }, []);
 
   const fetchEmployees = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch("http://localhost:4000/employees");
-      if (!response.ok) throw new Error("Failed to fetch employees");
-      const data: Employee[] = await response.json();
-      setEmployees(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-    } finally {
-      setLoading(false);
-    }
-  };
+  setLoading(true);
+  try {
+    const response = await fetch("http://localhost:4000/employees");
+    const data: Employee[] = await response.json();
+    console.log("Fetched employees:", data); // 👈 add this
+    setEmployees(data);
+  } catch (err) {
+    setError(err instanceof Error ? err.message : String(err));
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const fetchAnalysis = async () => {
     setLoading(true);
