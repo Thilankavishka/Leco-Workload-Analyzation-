@@ -1,45 +1,77 @@
-import React, { useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import blockData from "@/data/block-data";
 import { EmployeeTasks } from "@/components/employee-analysis/employee-tasks";
 import { EmployeeInfo } from "@/components/employee-analysis/employee-info";
 import { EmployeePerformanceSummary } from "@/components/employee-analysis/employee-performance-summary";
-import type { Block, Employee } from "@/common/type";
+
+interface Employee {
+  employee_id: string;
+  name: string;
+  role: string;
+  performance: number;
+  phone: string;
+  tasks_completed: number;
+  tasks_assigned: number;
+}
+
+interface Task {
+  task_id: string;
+  name: string;
+  progress: number;
+  start_date: string;
+  end_date?: string;
+}
 
 const EmployeeAnalysisPage: React.FC = () => {
   const navigate = useNavigate();
-  const { blockId, employeeId } = useParams<{ blockId: string; employeeId: string }>();
+  const { blockId, employeeId } = useParams<{
+    blockId: string;
+    employeeId: string;
+  }>();
+  const [employee, setEmployee] = useState<Employee | null>(null);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-  if (!blockId || !employeeId) return null;
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [empRes, taskRes] = await Promise.all([
+          fetch(`${API_URL}/api/employees/${employeeId}`),
+          fetch(`${API_URL}/api/employees/${employeeId}/tasks`),
+        ]);
+        const empData = await empRes.json();
+        const taskData = await taskRes.json();
+        setEmployee(empData);
+        setTasks(taskData);
+      } catch (err) {
+        console.error("Error fetching employee data:", err);
+      }
+    };
+    if (employeeId) fetchData();
+  }, [employeeId, API_URL]);
 
-  const block: Block | undefined = blockData[blockId];
-  const employee: Employee | undefined = block?.staff.find((e) => e.id === employeeId);
-
-  if (!block || !employee) return null;
-
-  // Filter tasks assigned to employee
-  const employeeTasks = useMemo(() => 
-    block.ongoingTasks.filter((task) => task.assignedTo.includes(employee.id)),
-    [block.ongoingTasks, employee.id]
-  );
-
-  // Filter tasks by date range
   const filteredTasks = useMemo(() => {
-    return employeeTasks.filter((task) => {
+    return tasks.filter((task) => {
       if (!startDate && !endDate) return true;
-      const taskStart = new Date(task.startDate);
-      const taskEnd = task.endDate ? new Date(task.endDate) : new Date();
+      const taskStart = new Date(task.start_date);
+      const taskEnd = task.end_date ? new Date(task.end_date) : new Date();
       const filterStart = startDate ? new Date(startDate) : new Date(0);
       const filterEnd = endDate ? new Date(endDate) : new Date();
       return taskStart >= filterStart && taskEnd <= filterEnd;
     });
-  }, [employeeTasks, startDate, endDate]);
+  }, [tasks, startDate, endDate]);
+
+  if (!employee)
+    return (
+      <div className="flex items-center justify-center min-h-screen text-gray-500">
+        Loading employee data...
+      </div>
+    );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
-      {/* Header */}
       <header className="bg-white shadow-sm border-b sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <button
@@ -48,16 +80,16 @@ const EmployeeAnalysisPage: React.FC = () => {
           >
             ← Back to Block Details
           </button>
-          <h1 className="text-2xl font-bold text-gray-900">Employee Performance Analysis</h1>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Employee Performance Analysis
+          </h1>
           <div className="w-32" />
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-8 space-y-8">
-        {/* Employee Info */}
         <EmployeeInfo block={block} employee={employee} />
 
-        {/* Employee Tasks with Date Filter */}
         <EmployeeTasks
           employee={employee}
           tasks={filteredTasks}
@@ -66,9 +98,7 @@ const EmployeeAnalysisPage: React.FC = () => {
           setStartDate={setStartDate}
           setEndDate={setEndDate}
         />
-
-        {/* Performance Summary & Recommendations */}
-        <EmployeePerformanceSummary block={block} employee={employee} />
+        <EmployeePerformanceSummary employee={employee} />
       </main>
     </div>
   );

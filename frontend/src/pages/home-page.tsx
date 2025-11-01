@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Building2,
@@ -28,47 +28,92 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
-import blockData from "@/data/block-data";
+import axios from "axios";
+
 import DashboardCard from "@/components/dashboard-card";
 import { Button } from "@/components/ui/button";
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState<string>("");
-  const [visibleCount, setVisibleCount] = useState<number>(6); // initial visible blocks
-  const [expanded, setExpanded] = useState<boolean>(false); // toggle state
 
-  const dashboardData = {
-    totalBlocks: Object.keys(blockData).length,
-    ongoingProjects: 8,
-    completedProjects: 135,
-    overallPerformance: [
-      { month: "Jan", handover: 65, completion: 75 },
-      { month: "Feb", handover: 70, completion: 80 },
-      { month: "Mar", handover: 75, completion: 85 },
-      { month: "Apr", handover: 80, completion: 82 },
-      { month: "May", handover: 85, completion: 88 },
-      { month: "Jun", handover: 90, completion: 92 },
-    ],
-  };
+  // State
+  const [blockData, setBlockData] = useState<Record<string, any>>({});
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [visibleCount, setVisibleCount] = useState(6);
+  const [expanded, setExpanded] = useState(false);
 
+  // Fetch from backend
+  useEffect(() => {
+    const fetchBlocks = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/blocks");
+        const formattedData = res.data.reduce((acc: any, block: any) => {
+          acc[block.block_id] = {
+            name: block.name,
+            employees: block.employees_count,
+            tasks: {
+              completed: block.tasks_completed,
+              total: block.tasks_total,
+            },
+            performance: { monthly: block.monthly_performance },
+            ongoingTasks: block.Tasks || [],
+          };
+          return acc;
+        }, {});
+        setBlockData(formattedData);
+        setLoading(false);
+      } catch (err) {
+        console.error("Error fetching blocks:", err);
+      }
+    };
+
+    fetchBlocks();
+  }, []);
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <p className="text-gray-500 text-lg">Loading dashboard data...</p>
+      </div>
+    );
+  }
+
+  // Calculate dashboard data
+  const totalBlocks = Object.keys(blockData).length;
   const totalTasks = Object.values(blockData).reduce(
-    (acc, block) => acc + block.tasks.total,
+    (acc: any, block: any) => acc + (block.tasks.total || 0),
     0
   );
   const completedTasks = Object.values(blockData).reduce(
-    (acc, block) => acc + block.tasks.completed,
+    (acc: any, block: any) => acc + (block.tasks.completed || 0),
     0
   );
   const totalEmployees = Object.values(blockData).reduce(
-    (acc, block) => acc + block.employees,
+    (acc: any, block: any) => acc + (block.employees || 0),
     0
   );
+
+  const dashboardData = {
+    totalBlocks,
+    ongoingProjects: 8,
+    completedProjects: 5,
+    overallPerformance: [
+      { month: "June", handover: 80, completion: 90 },
+      { month: "July", handover: 75, completion: 85 },
+      { month: "August", handover: 82, completion: 88 },
+      { month: "September", handover: 88, completion: 92 },
+      { month: "October", handover: 91, completion: 95 },
+      { month: "November", handover: 94, completion: 97 },
+    ],
+  };
 
   const handleBlockClick = (blockId: string) => {
     navigate(`/block/${blockId}`);
   };
 
+  // Search and filtering
   const filteredBlocks = Object.entries(blockData).filter(([, block]) =>
     block.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -77,10 +122,8 @@ const HomePage: React.FC = () => {
 
   const handleToggle = () => {
     if (expanded) {
-      // collapse to default
       setVisibleCount(6);
     } else {
-      // expand to show all
       setVisibleCount(filteredBlocks.length);
     }
     setExpanded(!expanded);
@@ -89,7 +132,7 @@ const HomePage: React.FC = () => {
   const cardsData = [
     {
       title: "Total Blocks",
-      value: dashboardData.totalBlocks,
+      value: totalBlocks,
       description: "Active operational blocks",
       icon: <Building2 className="w-6 h-6" />,
       gradientFrom: "from-blue-500",
@@ -98,7 +141,9 @@ const HomePage: React.FC = () => {
     {
       title: "Total Tasks",
       value: `${completedTasks}/${totalTasks}`,
-      description: `${Math.round((completedTasks / totalTasks) * 100)}% completion rate`,
+      description: `${
+        totalTasks ? Math.round((completedTasks / totalTasks) * 100) : 0
+      }% completion rate`,
       icon: <Activity className="w-6 h-6" />,
       gradientFrom: "from-green-500",
       gradientTo: "to-green-600",
@@ -135,7 +180,9 @@ const HomePage: React.FC = () => {
           </div>
           <div className="text-right">
             <p className="text-sm text-gray-600">Dashboard Overview</p>
-            <p className="text-xs text-gray-500">Last updated: Today, 10:30 AM</p>
+            <p className="text-xs text-gray-500">
+              Last updated: Today, 10:30 AM
+            </p>
           </div>
         </div>
       </header>
@@ -200,22 +247,34 @@ const HomePage: React.FC = () => {
                   className="cursor-pointer rounded-3xl shadow-lg backdrop-blur-sm bg-white/50 hover:shadow-2xl transition-all"
                 >
                   <CardHeader className="pb-0">
-                    <CardTitle className="text-xl font-bold text-gray-900">{block.name}</CardTitle>
+                    <CardTitle className="text-xl font-bold text-gray-900">
+                      {block.name}
+                    </CardTitle>
                   </CardHeader>
 
                   <CardContent>
                     <div className="flex flex-col md:flex-row gap-2">
                       {/* Overall Progress */}
                       <div className="flex-1 bg-blue-50/50 border border-blue-100 rounded-2xl p-4 flex flex-col items-center justify-center">
-                        <p className="text-sm text-blue-600 font-medium text-center">Overall Progress</p>
+                        <p className="text-sm text-blue-600 font-medium text-center">
+                          Overall Progress
+                        </p>
                         <p className="text-2xl font-bold text-blue-700">
-                          {Math.round((block.tasks.completed / block.tasks.total) * 100)}%
+                          {block.tasks.total
+                            ? Math.round(
+                                (block.tasks.completed / block.tasks.total) *
+                                  100
+                              )
+                            : 0}
+                          %
                         </p>
                       </div>
 
                       {/* Ongoing Tasks */}
                       <div className="flex-1 bg-orange-50/50 border border-orange-100 rounded-2xl p-4 flex flex-col items-center justify-center">
-                        <p className="text-sm text-orange-600 font-medium text-center">Ongoing Tasks</p>
+                        <p className="text-sm text-orange-600 font-medium text-center">
+                          Ongoing Tasks
+                        </p>
                         <p className="text-2xl font-bold text-orange-700">
                           {block.ongoingTasks?.length || 0}
                         </p>
@@ -223,8 +282,12 @@ const HomePage: React.FC = () => {
 
                       {/* Performance */}
                       <div className="flex-1 bg-green-50/50 border border-green-100 rounded-2xl p-4 flex flex-col items-center justify-center">
-                        <p className="text-sm text-green-600 font-medium text-center">Performance</p>
-                        <p className="text-2xl font-bold text-green-700">{block.performance.monthly}%</p>
+                        <p className="text-sm text-green-600 font-medium text-center">
+                          Performance
+                        </p>
+                        <p className="text-2xl font-bold text-green-700">
+                          {block.performance.monthly || 0}%
+                        </p>
                       </div>
                     </div>
                   </CardContent>
@@ -240,7 +303,11 @@ const HomePage: React.FC = () => {
                   className="px-6 py-3 bg-white/30 backdrop-blur-md text-blue-700 font-semibold rounded-2xl shadow-md hover:shadow-xl hover:bg-white/50 transition-all duration-300 flex items-center space-x-2"
                 >
                   <span>{expanded ? "See Less" : "See More"}</span>
-                  {expanded ? <ArrowUp className="w-5 h-5" /> : <ArrowDown className="w-5 h-5" />}
+                  {expanded ? (
+                    <ArrowUp className="w-5 h-5" />
+                  ) : (
+                    <ArrowDown className="w-5 h-5" />
+                  )}
                 </Button>
               </div>
             )}
@@ -251,7 +318,9 @@ const HomePage: React.FC = () => {
         <Card className="shadow-lg mb-8">
           <CardHeader>
             <CardTitle className="text-xl">Overall Performance Trend</CardTitle>
-            <CardDescription>6-month analysis of project delivery metrics</CardDescription>
+            <CardDescription>
+              6-month analysis of project delivery metrics
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={350}>
@@ -260,12 +329,26 @@ const HomePage: React.FC = () => {
                 <XAxis dataKey="month" stroke="#666" />
                 <YAxis stroke="#666" />
                 <Tooltip
-                  contentStyle={{ backgroundColor: "#fff", border: "1px solid #ddd", borderRadius: "8px" }}
+                  contentStyle={{
+                    backgroundColor: "#fff",
+                    border: "1px solid #ddd",
+                    borderRadius: "8px",
+                  }}
                   formatter={(value) => `${value}%`}
                 />
                 <Legend />
-                <Bar dataKey="handover" fill="#3b82f6" name="Project Handover %" radius={[8, 8, 0, 0]} />
-                <Bar dataKey="completion" fill="#10b981" name="Completion Level %" radius={[8, 8, 0, 0]} />
+                <Bar
+                  dataKey="handover"
+                  fill="#3b82f6"
+                  name="Project Handover %"
+                  radius={[8, 8, 0, 0]}
+                />
+                <Bar
+                  dataKey="completion"
+                  fill="#10b981"
+                  name="Completion Level %"
+                  radius={[8, 8, 0, 0]}
+                />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
