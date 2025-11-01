@@ -1,0 +1,205 @@
+-- ================================
+-- BLOCKS TABLE
+-- ================================
+CREATE TABLE blocks (
+  block_id VARCHAR(20) PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  employees_count INT,
+  vehicles_count INT,
+  tasks_completed INT,
+  tasks_total INT,
+  monthly_performance DECIMAL(5,2)
+);
+
+-- ================================
+-- EMPLOYEES TABLE
+-- ================================
+CREATE TABLE employees (
+  employee_id VARCHAR(20) PRIMARY KEY,
+  block_id VARCHAR(20),
+  name VARCHAR(100) NOT NULL,
+  phone VARCHAR(20),
+  role VARCHAR(50),
+  performance DECIMAL(5,2),
+  tasks_completed INT,
+  tasks_assigned INT,
+  FOREIGN KEY (block_id) REFERENCES blocks(block_id)
+    ON UPDATE CASCADE ON DELETE SET NULL
+);
+
+-- ================================
+-- TASKS TABLE
+-- ================================
+CREATE TABLE tasks (
+  task_id VARCHAR(20) PRIMARY KEY,
+  block_id VARCHAR(20),
+  name VARCHAR(100) NOT NULL,
+  progress INT CHECK (progress BETWEEN 0 AND 100),
+  priority ENUM('high', 'medium', 'low'),
+  start_date DATE,
+  end_date DATE NULL,
+  FOREIGN KEY (block_id) REFERENCES blocks(block_id)
+    ON UPDATE CASCADE ON DELETE SET NULL
+);
+
+-- ================================
+-- TASK ASSIGNMENTS (Many-to-Many)
+-- ================================
+CREATE TABLE task_assignments (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  task_id VARCHAR(20),
+  employee_id VARCHAR(20),
+  FOREIGN KEY (task_id) REFERENCES tasks(task_id)
+    ON UPDATE CASCADE ON DELETE CASCADE,
+  FOREIGN KEY (employee_id) REFERENCES employees(employee_id)
+    ON UPDATE CASCADE ON DELETE CASCADE,
+  UNIQUE (task_id, employee_id)
+);
+
+-- ================================
+-- PERFORMANCE HISTORY
+-- ================================
+CREATE TABLE performance_history (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  block_id VARCHAR(20),
+  period VARCHAR(50),
+  value DECIMAL(5,2),
+  FOREIGN KEY (block_id) REFERENCES blocks(block_id)
+    ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+
+
+-- ================================
+-- Sample Data Insertion
+-- ================================
+INSERT INTO blocks (block_id, name, employees_count, vehicles_count, tasks_completed, tasks_total, monthly_performance)
+VALUES
+('B001', 'AI Research Lab', 6, 2, 18, 24, 92.50),
+('B002', 'Software Development', 5, 3, 15, 20, 88.75),
+('B003', 'Network Operations', 4, 2, 10, 12, 85.40),
+('B004', 'Cyber Security Unit', 5, 2, 14, 18, 90.25),
+('B005', 'Cloud Infrastructure', 5, 3, 20, 25, 91.60),
+('B006', 'Data Analytics', 5, 2, 16, 22, 89.30),
+('B007', 'IoT & Robotics', 5, 2, 12, 16, 84.20),
+('B008', 'UI/UX Design', 5, 1, 13, 17, 87.10),
+('B009', 'Mobile Development', 5, 2, 15, 21, 88.45),
+('B010', 'Server Operations', 5, 3, 11, 15, 86.75);
+
+INSERT INTO employees (employee_id, block_id, name, phone, role, performance, tasks_completed, tasks_assigned) VALUES
+('E001', 'B001', 'Alice Fernando', '0771234567', 'AI Engineer', 94.50, 8, 9),
+('E002', 'B001', 'Brian Silva', '0712345678', 'ML Engineer', 92.10, 7, 9),
+('E003', 'B001', 'Manuja Peiris', '0767890123', 'AI Intern', 87.60, 3, 6),
+('E004', 'B001', 'Disara Gunawardena', '0701112233', 'Data Scientist', 90.00, 6, 7),
+('E005', 'B001', 'Kavishka De Silva', '0785678910', 'Research Assistant', 85.20, 5, 7),
+
+('E006', 'B002', 'Chathura Perera', '0773216549', 'Software Engineer', 89.70, 6, 8),
+('E007', 'B002', 'Danuka Jayasuriya', '0714567890', 'Backend Developer', 91.40, 7, 8),
+('E008', 'B002', 'Nadeesha Rathnayake', '0759876543', 'QA Engineer', 88.20, 5, 7),
+('E009', 'B002', 'Sithuka Alahakoon', '0725544332', 'Frontend Developer', 86.90, 4, 7),
+('E010', 'B002', 'Tharindu Dias', '0769988776', 'DevOps Engineer', 90.10, 6, 7),
+
+('E011', 'B003', 'Eshan Wijesekara', '0779988776', 'Network Engineer', 88.30, 5, 6),
+('E012', 'B003', 'Pavithra Karunaratne', '0754433221', 'Network Analyst', 85.10, 4, 6),
+('E013', 'B003', 'Sanjaya Bandara', '0741122334', 'System Operator', 86.70, 4, 5),
+('E014', 'B003', 'Vimukthi Rajapaksha', '0787766554', 'Cable Technician', 82.40, 3, 5),
+
+('E015', 'B004', 'Fathima Rizwana', '0712323234', 'Security Analyst', 93.20, 7, 8),
+('E016', 'B004', 'Supun Lakmal', '0775556667', 'Pen Tester', 89.40, 6, 7),
+('E017', 'B004', 'Lahiru Mendis', '0722233445', 'SOC Engineer', 90.30, 6, 7),
+('E018', 'B004', 'Dulani Hettiarachchi', '0746655443', 'Forensic Expert', 88.60, 5, 7),
+('E019', 'B004', 'Ishani Abeykoon', '0765544332', 'Incident Responder', 87.50, 4, 6),
+
+('E020', 'B005', 'Gihan Mendis', '0771122445', 'Cloud Architect', 91.80, 7, 8),
+('E021', 'B005', 'Oshada Fernando', '0712233445', 'DevOps Engineer', 92.10, 8, 9),
+('E022', 'B005', 'Sandun Rathnayake', '0753344556', 'Cloud Admin', 88.40, 5, 6),
+('E023', 'B005', 'Charitha Senanayake', '0747788990', 'System Engineer', 90.20, 6, 7),
+('E024', 'B005', 'Ayesh Pathirana', '0789988776', 'Automation Specialist', 87.90, 5, 6),
+
+('E025', 'B006', 'Heshan De Silva', '0703344556', 'Data Scientist', 91.40, 8, 9),
+('E026', 'B006', 'Pasan Dissanayake', '0769988771', 'Data Analyst', 89.70, 6, 7),
+('E027', 'B006', 'Nirmal Ekanayake', '0726655443', 'Statistician', 88.00, 5, 6),
+('E028', 'B006', 'Thivanka Abeywardena', '0775544331', 'Data Engineer', 86.90, 4, 6),
+('E029', 'B006', 'Rekha Madushani', '0743344552', 'BI Developer', 87.60, 4, 6),
+
+('E030', 'B007', 'Iresha Gunathilake', '0771122334', 'IoT Developer', 85.70, 5, 6),
+('E031', 'B007', 'Kasun Wijenayake', '0719988775', 'Embedded Engineer', 83.40, 4, 6),
+('E032', 'B007', 'Ruwan Edirisinghe', '0785566778', 'Hardware Specialist', 86.10, 4, 5),
+('E033', 'B007', 'Chalani Karunarathne', '0756655443', 'Robot Programmer', 82.90, 3, 5),
+('E034', 'B007', 'Amaya Fernando', '0708877665', 'IoT Tester', 84.00, 3, 5),
+
+('E035', 'B008', 'Janith Rodrigo', '0771122335', 'UI Designer', 88.70, 6, 7),
+('E036', 'B008', 'Thushari Jayasuriya', '0713344556', 'UX Researcher', 87.20, 5, 6),
+('E037', 'B008', 'Chamika Fonseka', '0749988776', 'Frontend Developer', 85.80, 4, 6),
+('E038', 'B008', 'Maleesha Jayawardena', '0786655443', 'Animator', 83.90, 3, 5),
+('E039', 'B008', 'Sanjula Perera', '0751122335', 'Graphic Designer', 84.60, 3, 5),
+
+('E040', 'B009', 'Kavindu Liyanage', '0704433221', 'Mobile Developer', 89.30, 7, 8),
+('E041', 'B009', 'Sasindu Rajapaksha', '0765544331', 'Flutter Engineer', 88.50, 6, 7),
+('E042', 'B009', 'Yasith Perera', '0719988771', 'React Native Dev', 86.80, 5, 7),
+('E043', 'B009', 'Nimasha Jayasekara', '0746655442', 'UI Tester', 85.50, 4, 6),
+('E044', 'B009', 'Pavani Dissanayake', '0788877665', 'Backend Developer', 87.00, 5, 6),
+
+('E045', 'B010', 'Lakmini Abeykoon', '0773344556', 'Server Admin', 89.90, 6, 7),
+('E046', 'B010', 'Mihiran Perera', '0712233446', 'Infrastructure Engineer', 87.30, 5, 6),
+('E047', 'B010', 'Chandula Dissanayake', '0753344554', 'System Operator', 85.70, 4, 6),
+('E048', 'B010', 'Isuru Fernando', '0745544332', 'Maintenance Lead', 84.50, 4, 5),
+('E049', 'B010', 'Ravindu Senarath', '0782233446', 'Cooling Technician', 83.20, 3, 5);
+
+
+INSERT INTO tasks (task_id, block_id, name, progress, priority, start_date, end_date) VALUES
+('T001', 'B001', 'Train Chatbot Model', 80, 'high', '2025-01-10', '2025-03-15'),
+('T002', 'B001', 'Collect NLP Dataset', 60, 'medium', '2025-02-01', '2025-03-30'),
+('T003', 'B002', 'Build E-Commerce API', 75, 'high', '2025-02-15', '2025-05-10'),
+('T004', 'B002', 'Setup DevOps Pipeline', 65, 'medium', '2025-03-01', NULL),
+('T005', 'B003', 'Upgrade Routers', 100, 'high', '2025-01-20', '2025-02-25'),
+('T006', 'B004', 'Firewall Enhancement', 95, 'high', '2025-02-10', '2025-04-01'),
+('T007', 'B005', 'Migrate Cloud Servers', 70, 'high', '2025-04-05', NULL),
+('T008', 'B005', 'Automate Deployments', 50, 'medium', '2025-05-01', NULL),
+('T009', 'B006', 'Design Data Warehouse', 65, 'high', '2025-03-20', '2025-06-10'),
+('T010', 'B006', 'Create Analytics Dashboard', 55, 'medium', '2025-04-15', NULL),
+('T011', 'B007', 'Develop Sensor Firmware', 60, 'high', '2025-03-25', '2025-07-10'),
+('T012', 'B007', 'Robot Movement Programming', 50, 'medium', '2025-04-10', NULL),
+('T013', 'B008', 'Redesign App Interface', 95, 'high', '2025-02-01', '2025-05-01'),
+('T014', 'B009', 'Develop Food Delivery App', 70, 'high', '2025-02-15', NULL),
+('T015', 'B010', 'Server Cooling Upgrade', 40, 'medium', '2025-03-10', NULL);
+
+INSERT INTO task_assignments (task_id, employee_id) VALUES
+('T001','E001'),('T001','E002'),
+('T002','E003'),('T002','E004'),
+('T003','E006'),('T003','E007'),
+('T004','E008'),('T004','E010'),
+('T005','E011'),('T005','E012'),
+('T006','E015'),('T006','E017'),
+('T007','E020'),('T007','E021'),
+('T008','E022'),('T008','E023'),
+('T009','E025'),('T009','E026'),
+('T010','E028'),('T010','E029'),
+('T011','E030'),('T011','E031'),
+('T012','E033'),('T012','E034'),
+('T013','E035'),('T013','E037'),
+('T014','E040'),('T014','E041'),
+('T015','E045'),('T015','E046');
+
+INSERT INTO performance_history (block_id, period, value) VALUES
+('B001', '2025-January', 91.40),
+('B001', '2025-February', 92.50),
+('B002', '2025-January', 87.60),
+('B002', '2025-February', 88.75),
+('B003', '2025-January', 84.90),
+('B003', '2025-February', 85.40),
+('B004', '2025-January', 89.80),
+('B004', '2025-February', 90.25),
+('B005', '2025-January', 90.80),
+('B005', '2025-February', 91.60),
+('B006', '2025-January', 88.70),
+('B006', '2025-February', 89.30),
+('B007', '2025-January', 83.80),
+('B007', '2025-February', 84.20),
+('B008', '2025-January', 86.50),
+('B008', '2025-February', 87.10),
+('B009', '2025-January', 87.80),
+('B009', '2025-February', 88.45),
+('B010', '2025-January', 86.20),
+('B010', '2025-February', 86.75);
+
