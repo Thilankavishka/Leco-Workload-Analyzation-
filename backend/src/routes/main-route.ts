@@ -11,8 +11,8 @@ import taskRouter from "./task-route";
 
 const router = Router();
 
-router.use("blocks/", blockRouter);
-router.use("employees/", employeeRouter);
-router.use("tasks/", taskRouter);
+router.use("/blocks", blockRouter);
+router.use("/employees", employeeRouter);
+router.use("/tasks", taskRouter);
 
 export default router;
