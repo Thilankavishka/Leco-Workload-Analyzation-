@@ -1,3 +1,8 @@
+/**
+ * block-service.ts
+ * 
+ * @updated 11/03/2025
+ */
 import * as BlockRepository from "../repositories/block-repository";
 
 // get all blocks
