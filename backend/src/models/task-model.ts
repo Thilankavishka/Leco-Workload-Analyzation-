@@ -1,7 +1,7 @@
 /**
  * task-model.ts
  * 
- * @update 11/03/2025
+ * @updated 11/03/2025
  */
 import { Priority } from "@prisma/client";
 import { z } from "zod";
