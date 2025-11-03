@@ -1,3 +1,8 @@
+/**
+ * employee-model.ts
+ * 
+ * @update 11/03/2025
+ */
 import { z } from "zod";
 
 export const EmployeeModel = z.object({
