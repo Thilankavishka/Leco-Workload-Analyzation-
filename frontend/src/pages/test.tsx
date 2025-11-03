@@ -1,6 +1,13 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Users, Car, Award, ArrowRight, Activity, Search } from "lucide-react";
+import {
+  Users,
+  Car,
+  Award,
+  ArrowRight,
+  Activity,
+  Search,
+} from "lucide-react";
 import {
   Card,
   CardContent,
@@ -8,176 +15,105 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
-  LineChart,
-  Line,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   Tooltip,
   CartesianGrid,
+  LineChart,
+  Line,
   ResponsiveContainer,
-  BarChart,
-  Bar,
   PieChart,
   Pie,
   Cell,
 } from "recharts";
-import { Input } from "@/components/ui/input";
+import blockData from "@/data/block-data";
 
-interface Block {
-  block_id: string;
-  name: string;
-  employees_count: number;
-  vehicles_count: number;
-  tasks_completed: number;
-  tasks_total: number;
-  monthly_performance: number;
-}
-
-interface Employee {
-  employee_id: string;
-  name: string;
-  performance: number;
-  tasksCompleted: number;
-  tasksAssigned: number;
-  role?: string;
-}
-
-interface Task {
-  task_id: string;
-  progress: number;
-}
-
-interface PerformanceHistory {
-  id: number;
-  block_id: string;
-  period: string;
-  value: number;
-}
+const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
 
 const BlockDetailsPage: React.FC = () => {
   const navigate = useNavigate();
   const { blockId } = useParams<{ blockId: string }>();
-
-  const [block, setBlock] = useState<Block | null>(null);
-  const [employees, setEmployees] = useState<Employee[]>([]);
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [performanceHistory, setPerformanceHistory] = useState<PerformanceHistory[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+  const block = blockId ? blockData[blockId] : null;
+  if (!block) return null;
 
-  useEffect(() => {
-    if (!blockId) return;
-
-    const fetchBlockData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const urls = [
-          `${API_URL}/api/blocks/${blockId}`,
-          `${API_URL}/api/employees?blockId=${blockId}`,
-          `${API_URL}/api/tasks?blockId=${blockId}`,
-          `${API_URL}/api/performance-history?blockId=${blockId}`,
-        ];
-
-        const responses = await Promise.all(urls.map((url) => fetch(url)));
-
-        // check for HTML error page
-        for (const res of responses) {
-          if (!res.ok) throw new Error("One or more API responses failed");
-          const text = await res.clone().text();
-          if (text.startsWith("<!DOCTYPE") || text.startsWith("<html")) {
-            throw new Error(`Unexpected HTML response from API: ${res.url}`);
-          }
-        }
-
-        const [blockData, empData, taskData, perfData] = await Promise.all(responses.map((res) => res.json()));
-
-        setBlock(blockData || null);
-        setEmployees(Array.isArray(empData) ? empData : []);
-        setTasks(Array.isArray(taskData) ? taskData : []);
-        setPerformanceHistory(Array.isArray(perfData) ? perfData : []);
-      } catch (err) {
-        console.error("❌ Fetch Error:", err);
-        setError("Failed to load block data. Please check your backend.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBlockData();
-  }, [blockId, API_URL]);
-
-  const metrics = useMemo(() => {
-    const totalEmployees = employees.length;
-    const vehicles = block?.vehicles_count || 0;
-    const completedTasks = tasks.filter((t) => t.progress === 100).length;
-    const totalTasks = tasks.length;
-    const completionRate = totalTasks ? Math.round((completedTasks / totalTasks) * 100) : 0;
-
-    return [
-      { label: "Total Employees", value: totalEmployees, icon: <Users className="w-5 h-5" />, gradient: "from-blue-500 to-blue-600" },
-      { label: "Vehicles", value: vehicles, icon: <Car className="w-5 h-5" />, gradient: "from-green-500 to-green-600" },
-      { label: "Task Completion", value: `${completionRate}%`, icon: <Award className="w-5 h-5" />, gradient: "from-purple-500 to-purple-600" },
-    ];
-  }, [block, employees, tasks]);
-
-  const filteredEmployees = employees.filter((e) =>
-    e.name.toLowerCase().includes(searchTerm.toLowerCase())
+  // Filtered staff based on search
+  const filteredStaff = block.staff.filter((employee) =>
+    employee.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (loading) return <div className="text-center mt-10 text-gray-600">Loading...</div>;
-  if (error) return <div className="text-center text-red-500 mt-10 font-medium">{error}</div>;
-  if (!block) return <div className="text-center mt-10 text-gray-500">No data found for this block.</div>;
-  const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
+  // Metrics for top cards
+  const metrics = [
+    {
+      label: "Total Employees",
+      value: block.employees,
+      icon: <Users className="w-5 h-5" />,
+      gradient: "from-blue-500 to-blue-600",
+      textColor: "text-white",
+    },
+    {
+      label: "Vehicles",
+      value: block.vehicles,
+      icon: <Car className="w-5 h-5" />,
+      gradient: "from-green-500 to-green-600",
+      textColor: "text-white",
+    },
+    {
+      label: "Task Completion",
+      value: `${Math.round((block.tasks.completed / block.tasks.total) * 100)}%`,
+      icon: <Award className="w-5 h-5" />,
+      gradient: "from-purple-500 to-purple-600",
+      textColor: "text-white",
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <button onClick={() => navigate("/")} className="text-blue-600 hover:text-blue-700 font-medium flex items-center space-x-2">
+          <button
+            onClick={() => navigate("/")}
+            className="text-blue-600 hover:text-blue-700 font-medium flex items-center space-x-2"
+          >
             <ArrowRight className="w-4 h-4 rotate-180" />
             <span>Back to Dashboard</span>
           </button>
-
           <h1 className="text-2xl font-bold text-gray-900">{block.name}</h1>
-
-          <button onClick={() => navigate("/comparison")} className="px-6 py-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white rounded-lg font-semibold transition-all">
+          <button
+            onClick={() => navigate("/comparison")}
+            className="px-6 py-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white rounded-lg font-semibold transition-all"
+          >
             Deep Comparison
           </button>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-8">
-        {/* Metrics */}
+        {/* Metrics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {metrics.map((m) => (
-            <Card key={m.label} className={`bg-gradient-to-br ${m.gradient} text-white shadow-lg`}>
+          {metrics.map((metric) => (
+            <Card
+              key={metric.label}
+              className={`bg-gradient-to-br ${metric.gradient} ${metric.textColor} shadow-lg`}
+            >
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2 text-lg">
-                  {m.icon}<span>{m.label}</span>
+                <CardTitle className="text-lg flex items-center space-x-2">
+                  {metric.icon}
+                  <span>{metric.label}</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-4xl font-bold">{m.value}</p>
+                <p className="text-4xl font-bold">{metric.value}</p>
               </CardContent>
             </Card>
           ))}
         </div>
-
-        {/* Employee Search */}
-        <Input
-          type="text"
-          placeholder="Search employees..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="mb-6"
-        />
 
         {/* Employee Performance Analytics */}
         <Card className="shadow-lg mb-8">
@@ -198,7 +134,7 @@ const BlockDetailsPage: React.FC = () => {
                 <h3 className="font-semibold text-gray-900 mb-4">Performance Comparison</h3>
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart
-                    data={employees.map((s) => ({
+                    data={block.staff.map((s) => ({
                       name: s.name.split(" ")[0],
                       performance: s.performance,
                     }))}
@@ -218,7 +154,7 @@ const BlockDetailsPage: React.FC = () => {
                 <ResponsiveContainer width="100%" height={300}>
                   <PieChart>
                     <Pie
-                      data={employees.map((s) => ({
+                      data={block.staff.map((s) => ({
                         name: s.name.split(" ")[0],
                         value: s.tasksCompleted,
                       }))}
@@ -232,7 +168,7 @@ const BlockDetailsPage: React.FC = () => {
                       fill="#8884d8"
                       dataKey="value"
                     >
-                      {employees.map((_, index) => (
+                      {block.staff.map((_, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
@@ -256,7 +192,7 @@ const BlockDetailsPage: React.FC = () => {
 
             {/* Employee Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {employees.map((employee, index) => {
+              {filteredStaff.map((employee) => {
                 const successRate = Math.round(
                   (employee.tasksCompleted / employee.tasksAssigned) * 100
                 );
@@ -267,9 +203,9 @@ const BlockDetailsPage: React.FC = () => {
 
                 return (
                   <Card
-                    key={index}
+                    key={employee.id}
                     onClick={() =>
-                      navigate(`/block/${blockId}/employee/${employee.employee_id}`)
+                      navigate(`/block/${blockId}/employee/${employee.id}`)
                     }
                     className="cursor-pointer rounded-3xl shadow-lg backdrop-blur-sm bg-white/50 hover:shadow-2xl transition-all"
                   >
@@ -325,53 +261,74 @@ const BlockDetailsPage: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Employee Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {filteredEmployees.map((emp) => {
-            const successRate = emp.tasksAssigned ? Math.round((emp.tasksCompleted / emp.tasksAssigned) * 100) : 0;
-            const initials = emp.name.split(" ").map((n) => n[0]).join("");
-
-            return (
-              <Card key={emp.employee_id} className="cursor-pointer rounded-2xl shadow-lg p-4 hover:shadow-2xl transition-all">
+        {/* Task List Section */}
+        <div className="mb-8">
+          <h3 className="text-xl font-semibold text-gray-900 mb-4">Ongoing Tasks</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {block.ongoingTasks.map((task) => (
+              <Card
+                key={task.id}
+                className="cursor-pointer hover:shadow-lg transition-shadow"
+                onClick={() => navigate(`/block/${blockId}/task/${task.id}`)}
+              >
                 <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">{initials}</div>
-                    <span>{emp.name}</span>
-                  </CardTitle>
-                  <CardDescription>{emp.role || "Employee"}</CardDescription>
+                  <CardTitle className="text-lg font-bold">{task.name}</CardTitle>
+                  <CardDescription>
+                    Assigned to {task.assignedTo.length} employee{task.assignedTo.length > 1 ? 's' : ''}
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex flex-col gap-2">
-                    <p>Performance: {emp.performance}%</p>
-                    <p>Tasks Done: {emp.tasksCompleted}/{emp.tasksAssigned}</p>
-                    <p>Success Rate: {successRate}%</p>
+                  <div className="flex justify-between items-center">
+                    <p className="text-sm text-gray-600">Progress</p>
+                    <p className="font-semibold text-blue-600">{task.progress}%</p>
+                  </div>
+                  <div className="flex justify-between items-center mt-1">
+                    <p className="text-sm text-gray-600">Priority</p>
+                    <span
+                      className={`px-2 py-1 rounded text-xs font-semibold ${task.priority === "high"
+                        ? "bg-red-100 text-red-700"
+                        : task.priority === "medium"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : "bg-green-100 text-green-700"
+                        }`}
+                    >
+                      {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center mt-1 text-gray-500 text-sm">
+                    <p>Start: {task.startDate}</p>
+                    <p>End: {task.endDate || "Ongoing"}</p>
                   </div>
                 </CardContent>
               </Card>
-            );
-          })}
+            ))}
+          </div>
         </div>
 
-        {/* Performance Trend */}
-        {performanceHistory.length > 0 && (
-          <Card className="shadow-lg">
-            <CardHeader>
-              <CardTitle>Block Performance Trend</CardTitle>
-              <CardDescription>Weekly performance tracking</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={performanceHistory}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="period" />
-                  <YAxis domain={[0, 100]} />
-                  <Tooltip formatter={(v) => `${v}%`} />
-                  <Line type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={3} dot={{ r: 6 }} />
-                </LineChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        )}
+        {/* Block Performance Trend LineChart */}
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle>Block Performance Trend</CardTitle>
+            <CardDescription>Weekly performance tracking</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={block.performanceHistory}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="period" />
+                <YAxis domain={[0, 100]} />
+                <Tooltip formatter={(value) => `${value}%`} />
+                <Line
+                  type="monotone"
+                  dataKey="value"
+                  stroke="#3b82f6"
+                  strokeWidth={3}
+                  dot={{ r: 6 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
       </main>
     </div>
   );

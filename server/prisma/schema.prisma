@@ -1,0 +1,61 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "./prisma/generated"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Block {
+  id                 String               @id
+  name               String
+  employeesCount     Int
+  vehiclesCount      Int
+  completedTasks     Int
+  totalTasks         Int
+  performanceMonthly Int
+  performanceHistory PerformanceHistory[]
+  employees          Employee[]
+  tasks              Task[]
+}
+
+model Employee {
+  id             String  @id
+  name           String
+  phone          String
+  role           String
+  performance    Int
+  tasksCompleted Int
+  tasksAssigned  Int
+  block          Block?  @relation(fields: [blockId], references: [id])
+  blockId        String?
+  assignedTasks  Task[]  @relation("TaskAssignments")
+}
+
+model Task {
+  id         String     @id
+  name       String
+  progress   Int
+  priority   String
+  startDate  DateTime
+  endDate    DateTime?
+  block      Block?     @relation(fields: [blockId], references: [id])
+  blockId    String?
+  assignedTo Employee[] @relation("TaskAssignments")
+}
+
+model PerformanceHistory {
+  id      Int     @id @default(autoincrement())
+  period  String
+  value   Int
+  block   Block?  @relation(fields: [blockId], references: [id])
+  blockId String?
+}

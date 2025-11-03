@@ -41,14 +41,20 @@ const EmployeeAnalysisPage: React.FC = () => {
           fetch(`${API_URL}/api/employees/${employeeId}`),
           fetch(`${API_URL}/api/employees/${employeeId}/tasks`),
         ]);
+
+        if (!empRes.ok || !taskRes.ok) throw new Error("Failed to fetch data");
+
         const empData = await empRes.json();
         const taskData = await taskRes.json();
-        setEmployee(empData);
+
+        // Adjust depending on your backend structure
+        setEmployee(empData.employee || empData);
         setTasks(taskData);
       } catch (err) {
         console.error("Error fetching employee data:", err);
       }
     };
+
     if (employeeId) fetchData();
   }, [employeeId, API_URL]);
 
@@ -88,17 +94,10 @@ const EmployeeAnalysisPage: React.FC = () => {
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-8 space-y-8">
-        <EmployeeInfo block={block} employee={employee} />
 
-        <EmployeeTasks
-          employee={employee}
-          tasks={filteredTasks}
-          startDate={startDate}
-          endDate={endDate}
-          setStartDate={setStartDate}
-          setEndDate={setEndDate}
-        />
-        <EmployeePerformanceSummary employee={employee} />
+
+        {/* Performance Summary & Recommendations */}
+        <EmployeePerformanceSummary employeeId={employee.employee_id} />
       </main>
     </div>
   );
