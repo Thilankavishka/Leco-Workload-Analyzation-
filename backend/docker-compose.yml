@@ -1,0 +1,24 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:17
+    container_name: postgres-leco
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: leco-db
+    volumes:
+      - leco_postgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - leco-network
+
+volumes:
+  leco_postgres:
+
+networks:
+  leco-network:
+    driver: bridge
