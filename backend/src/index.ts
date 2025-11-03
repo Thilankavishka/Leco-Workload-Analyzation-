@@ -8,6 +8,7 @@ import http from "http"
 import bodyParser, { json } from "body-parser"
 import dotenv from "dotenv"
 import cors from 'cors'
+import MainRouter from "./routes/main-route"
 
 dotenv.config()
 
@@ -21,7 +22,7 @@ app.use(bodyParser.json())
 
 
 // routes
-
+app.use("/api", MainRouter)
 
 const server = http.createServer(app)
 const PORT = process.env.PORT || 5000

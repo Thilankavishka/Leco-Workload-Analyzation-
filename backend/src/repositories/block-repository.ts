@@ -1,7 +1,7 @@
 /**
  * block-repository.ts
  * 
- * @update 11/03/2025
+ * @updated 11/03/2025
  */
 import prismaClient from "../utils/prisma-client";
 
