@@ -1,3 +1,8 @@
+/**
+ * block-details-page.tsx
+ * 
+ * @update 11/04/2025
+ */
 import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
