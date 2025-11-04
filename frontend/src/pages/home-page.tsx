@@ -1,9 +1,9 @@
 /**
  * home-page.tsx
  * 
- * @update 11/04/2025
+ * @update 11/05/2025
  */
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Building2,
@@ -33,15 +33,31 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
-import blockData from "@/data/block-data";
 import DashboardCard from "@/components/dashboard-card";
 import { Button } from "@/components/ui/button";
+import axiosInstance from "@/common/axios-instance";
+import { apiSummary } from "@/common/summary-api";
 
 const HomePage: React.FC = () => {
+  const [blockData, setBlockData] = useState<Record<string, any>>({});
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [visibleCount, setVisibleCount] = useState<number>(6); // initial visible blocks
   const [expanded, setExpanded] = useState<boolean>(false); // toggle state
+
+  // Fetch block data from API
+  const fetchBlockData = async () => {
+    try {
+      const response = await axiosInstance.get(apiSummary.blocks.getAll);
+      setBlockData(response.data);
+    } catch (error) {
+      console.error("Error fetching block data:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchBlockData();
+  }, []);
 
   const dashboardData = {
     totalBlocks: Object.keys(blockData).length,
@@ -57,35 +73,38 @@ const HomePage: React.FC = () => {
     ],
   };
 
+  // Aggregated data
   const totalTasks = Object.values(blockData).reduce(
-    (acc, block) => acc + (block.tasksTotal ?? 0),
+    (acc, block) => acc + (block?.tasksTotal ?? 0),
     0
   );
   const completedTasks = Object.values(blockData).reduce(
-    (acc, block) => acc + (block.tasksCompleted ?? 0),
+    (acc, block) => acc + (block?.tasksCompleted ?? 0),
     0
   );
   const totalEmployees = Object.values(blockData).reduce(
-    (acc, block) => acc + (block.employeesCount ?? 0),
+    (acc, block) => acc + (block?.employeesCount ?? 0),
     0
   );
 
+  // Handle block click
   const handleBlockClick = (blockId: string) => {
     navigate(`/block/${blockId}`);
   };
 
-  const filteredBlocks = Object.entries(blockData).filter(([, block]) =>
-    block.name.toLowerCase().includes(searchTerm.toLowerCase())
+  // Filter blocks by search term safely
+  const filteredBlocks = Object.entries(blockData).filter(
+    ([, block]) =>
+      typeof block?.name === "string" &&
+      block.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const visibleBlocks = filteredBlocks.slice(0, visibleCount);
 
   const handleToggle = () => {
     if (expanded) {
-      // collapse to default
       setVisibleCount(6);
     } else {
-      // expand to show all
       setVisibleCount(filteredBlocks.length);
     }
     setExpanded(!expanded);
@@ -103,7 +122,9 @@ const HomePage: React.FC = () => {
     {
       title: "Total Tasks",
       value: `${completedTasks}/${totalTasks}`,
-      description: `${Math.round((completedTasks / totalTasks) * 100)}% completion rate`,
+      description: totalTasks
+        ? `${Math.round((completedTasks / totalTasks) * 100)}% completion rate`
+        : "0% completion rate",
       icon: <Activity className="w-6 h-6" />,
       gradientFrom: "from-green-500",
       gradientTo: "to-green-600",
@@ -144,6 +165,12 @@ const HomePage: React.FC = () => {
           </div>
         </div>
       </header>
+
+      <Button onClick={()=>{
+        console.log(blockData)
+      }}>
+        click
+      </Button>
 
       <main className="max-w-7xl mx-auto px-6 py-8">
         {/* Dashboard Cards */}
@@ -201,35 +228,49 @@ const HomePage: React.FC = () => {
               {visibleBlocks.map(([blockId, block]) => (
                 <Card
                   key={blockId}
-                  onClick={() => handleBlockClick(blockId)}
+                  onClick={() => handleBlockClick(block.id)}
                   className="cursor-pointer rounded-3xl shadow-lg backdrop-blur-sm bg-white/50 hover:shadow-2xl transition-all"
                 >
                   <CardHeader className="pb-0">
-                    <CardTitle className="text-xl font-bold text-gray-900">{block.name}</CardTitle>
+                    <CardTitle className="text-xl font-bold text-gray-900">
+                      {block?.name ?? "Unnamed Block"}
+                    </CardTitle>
                   </CardHeader>
 
                   <CardContent>
                     <div className="flex flex-col md:flex-row gap-2">
                       {/* Overall Progress */}
                       <div className="flex-1 bg-blue-50/50 border border-blue-100 rounded-2xl p-4 flex flex-col items-center justify-center">
-                        <p className="text-sm text-blue-600 font-medium text-center">Overall Progress</p>
+                        <p className="text-sm text-blue-600 font-medium text-center">
+                          Overall Progress
+                        </p>
                         <p className="text-2xl font-bold text-blue-700">
-                          {block.tasksTotal ? `${Math.round(((block.tasksCompleted ?? 0) / block.tasksTotal) * 100)}%` : "0%"}
+                          {block?.tasksTotal
+                            ? `${Math.round(
+                                ((block?.tasksCompleted ?? 0) / block?.tasksTotal) * 100
+                              )}%`
+                            : "0%"}
                         </p>
                       </div>
 
                       {/* Ongoing Tasks */}
                       <div className="flex-1 bg-orange-50/50 border border-orange-100 rounded-2xl p-4 flex flex-col items-center justify-center">
-                        <p className="text-sm text-orange-600 font-medium text-center">Ongoing Tasks</p>
+                        <p className="text-sm text-orange-600 font-medium text-center">
+                          Ongoing Tasks
+                        </p>
                         <p className="text-2xl font-bold text-orange-700">
-                          {block.ongoingTasks?.length || 0}
+                          {block?.ongoingTasks?.length ?? 0}
                         </p>
                       </div>
 
                       {/* Performance */}
                       <div className="flex-1 bg-green-50/50 border border-green-100 rounded-2xl p-4 flex flex-col items-center justify-center">
-                        <p className="text-sm text-green-600 font-medium text-center">Performance</p>
-                        <p className="text-2xl font-bold text-green-700">{block.performanceMonthly}%</p>
+                        <p className="text-sm text-green-600 font-medium text-center">
+                          Performance
+                        </p>
+                        <p className="text-2xl font-bold text-green-700">
+                          {block?.performanceMonthly ?? 0}%
+                        </p>
                       </div>
                     </div>
                   </CardContent>
@@ -245,7 +286,11 @@ const HomePage: React.FC = () => {
                   className="px-6 py-3 bg-white/30 backdrop-blur-md text-blue-700 font-semibold rounded-2xl shadow-md hover:shadow-xl hover:bg-white/50 transition-all duration-300 flex items-center space-x-2"
                 >
                   <span>{expanded ? "See Less" : "See More"}</span>
-                  {expanded ? <ArrowUp className="w-5 h-5" /> : <ArrowDown className="w-5 h-5" />}
+                  {expanded ? (
+                    <ArrowUp className="w-5 h-5" />
+                  ) : (
+                    <ArrowDown className="w-5 h-5" />
+                  )}
                 </Button>
               </div>
             )}
@@ -256,7 +301,9 @@ const HomePage: React.FC = () => {
         <Card className="shadow-lg mb-8">
           <CardHeader>
             <CardTitle className="text-xl">Overall Performance Trend</CardTitle>
-            <CardDescription>6-month analysis of project delivery metrics</CardDescription>
+            <CardDescription>
+              6-month analysis of project delivery metrics
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={350}>
@@ -265,12 +312,26 @@ const HomePage: React.FC = () => {
                 <XAxis dataKey="month" stroke="#666" />
                 <YAxis stroke="#666" />
                 <Tooltip
-                  contentStyle={{ backgroundColor: "#fff", border: "1px solid #ddd", borderRadius: "8px" }}
+                  contentStyle={{
+                    backgroundColor: "#fff",
+                    border: "1px solid #ddd",
+                    borderRadius: "8px",
+                  }}
                   formatter={(value) => `${value}%`}
                 />
                 <Legend />
-                <Bar dataKey="handover" fill="#3b82f6" name="Project Handover %" radius={[8, 8, 0, 0]} />
-                <Bar dataKey="completion" fill="#10b981" name="Completion Level %" radius={[8, 8, 0, 0]} />
+                <Bar
+                  dataKey="handover"
+                  fill="#3b82f6"
+                  name="Project Handover %"
+                  radius={[8, 8, 0, 0]}
+                />
+                <Bar
+                  dataKey="completion"
+                  fill="#10b981"
+                  name="Completion Level %"
+                  radius={[8, 8, 0, 0]}
+                />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
