@@ -43,7 +43,7 @@ const BlockDetailsPage: React.FC = () => {
   if (!block) return null;
 
   // Filtered staff based on search
-  const filteredStaff = block.staff.filter((employee) =>
+  const filteredStaff = (block.staff ?? []).filter((employee) =>
     employee.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -51,21 +51,21 @@ const BlockDetailsPage: React.FC = () => {
   const metrics = [
     {
       label: "Total Employees",
-      value: block.employees,
+      value: block.employeesCount,
       icon: <Users className="w-5 h-5" />,
       gradient: "from-blue-500 to-blue-600",
       textColor: "text-white",
     },
     {
       label: "Vehicles",
-      value: block.vehicles,
+      value: block.vehiclesCount,
       icon: <Car className="w-5 h-5" />,
       gradient: "from-green-500 to-green-600",
       textColor: "text-white",
     },
     {
       label: "Task Completion",
-      value: `${Math.round((block.tasks.completed / block.tasks.total) * 100)}%`,
+      value: `${Math.round(((block.tasksCompleted ?? 0) / (block.tasksTotal ?? 1)) * 100)}%`,
       icon: <Award className="w-5 h-5" />,
       gradient: "from-purple-500 to-purple-600",
       textColor: "text-white",
@@ -134,17 +134,18 @@ const BlockDetailsPage: React.FC = () => {
                 <h3 className="font-semibold text-gray-900 mb-4">Performance Comparison</h3>
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart
-                    data={block.staff.map((s) => ({
+                    data={(block.staff ?? []).map((s) => ({
                       name: s.name.split(" ")[0],
-                      performance: s.performance,
+                      performance: s.performance ?? 0,
                     }))}
                   >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
                     <YAxis domain={[0, 100]} />
-                    <Tooltip formatter={(value) => `${value}%`} />
+                    <Tooltip formatter={(value: number) => `${value}%`} />
                     <Bar dataKey="performance" fill="#3b82f6" radius={[8, 8, 0, 0]} />
                   </BarChart>
+
                 </ResponsiveContainer>
               </div>
 
@@ -154,7 +155,7 @@ const BlockDetailsPage: React.FC = () => {
                 <ResponsiveContainer width="100%" height={300}>
                   <PieChart>
                     <Pie
-                      data={block.staff.map((s) => ({
+                      data={(block.staff ?? []).map((s) => ({
                         name: s.name.split(" ")[0],
                         value: s.tasksCompleted,
                       }))}
@@ -168,7 +169,7 @@ const BlockDetailsPage: React.FC = () => {
                       fill="#8884d8"
                       dataKey="value"
                     >
-                      {block.staff.map((_, index) => (
+                      {(block.staff ?? []).map((_, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
@@ -194,7 +195,7 @@ const BlockDetailsPage: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               {filteredStaff.map((employee) => {
                 const successRate = Math.round(
-                  (employee.tasksCompleted / employee.tasksAssigned) * 100
+                  (employee.tasksCompleted ? employee.tasksCompleted : 0) / (employee.tasksAssigned ? employee.tasksAssigned : 0) * 100
                 );
                 const initials = employee.name
                   .split(" ")
@@ -265,7 +266,7 @@ const BlockDetailsPage: React.FC = () => {
         <div className="mb-8">
           <h3 className="text-xl font-semibold text-gray-900 mb-4">Ongoing Tasks</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {block.ongoingTasks.map((task) => (
+            {(block.ongoingTasks ?? []).map((task) => (
               <Card
                 key={task.id}
                 className="cursor-pointer hover:shadow-lg transition-shadow"
@@ -274,29 +275,35 @@ const BlockDetailsPage: React.FC = () => {
                 <CardHeader>
                   <CardTitle className="text-lg font-bold">{task.name}</CardTitle>
                   <CardDescription>
-                    Assigned to {task.assignedTo.length} employee{task.assignedTo.length > 1 ? 's' : ''}
+                    Assigned to {(task.assignedTo?.length ?? 0)} employee
+                    {(task.assignedTo?.length ?? 0) > 1 ? "s" : ""}
                   </CardDescription>
                 </CardHeader>
+
                 <CardContent>
                   <div className="flex justify-between items-center">
                     <p className="text-sm text-gray-600">Progress</p>
-                    <p className="font-semibold text-blue-600">{task.progress}%</p>
+                    <p className="font-semibold text-blue-600">{task.progress ?? 0}%</p>
                   </div>
+
                   <div className="flex justify-between items-center mt-1">
                     <p className="text-sm text-gray-600">Priority</p>
                     <span
                       className={`px-2 py-1 rounded text-xs font-semibold ${task.priority === "high"
-                        ? "bg-red-100 text-red-700"
-                        : task.priority === "medium"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : "bg-green-100 text-green-700"
+                          ? "bg-red-100 text-red-700"
+                          : task.priority === "medium"
+                            ? "bg-yellow-100 text-yellow-700"
+                            : "bg-green-100 text-green-700"
                         }`}
                     >
-                      {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+                      {task.priority
+                        ? task.priority.charAt(0).toUpperCase() + task.priority.slice(1)
+                        : "N/A"}
                     </span>
                   </div>
+
                   <div className="flex justify-between items-center mt-1 text-gray-500 text-sm">
-                    <p>Start: {task.startDate}</p>
+                    <p>Start: {task.startDate ?? "Unknown"}</p>
                     <p>End: {task.endDate || "Ongoing"}</p>
                   </div>
                 </CardContent>
