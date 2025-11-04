@@ -114,6 +114,13 @@ const BlockDetailsPage: React.FC = () => {
         </div>
       </header>
 
+      <button onClick={async () => {
+        const response = await axiosInstance.get(apiSummary.blocks.getEmployee(blockId!, blockData.staff[0].id));
+        console.log(response.data);
+      }}>
+        click
+      </button>
+
       <main className="max-w-7xl mx-auto px-6 py-8">
         {/* Metrics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -218,6 +225,7 @@ const BlockDetailsPage: React.FC = () => {
                 const assigned = Number(employee.tasksAssigned ?? 0);
                 const successRate = assigned > 0 ? Math.round((completed / assigned) * 100) : 0;
                 const nameStr = String(employee.name ?? "");
+                const employeeId = employee.id;
                 const initials = nameStr
                   .split(" ")
                   .filter(Boolean)
@@ -229,7 +237,7 @@ const BlockDetailsPage: React.FC = () => {
                   <Card
                     key={employee.id}
                     onClick={() =>
-                      navigate(`/block/${blockId}/employee/${employee.id}`)
+                      navigate(`/block/${blockId}/employee/${employeeId}`)
                     }
                     className="cursor-pointer rounded-3xl shadow-lg backdrop-blur-sm bg-white/50 hover:shadow-2xl transition-all"
                   >
