@@ -1,8 +1,14 @@
+/**
+ * performance-alert.tsx
+ * 
+ * @update 11/04/2025
+ */
 import React from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import blockData from "@/data/block-data";
 import { TrendingUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import type { Block } from "@/common/type";
 
 interface PerformanceAlertProps {
   selectedBlocks: string[];
@@ -18,9 +24,17 @@ export const PerformanceAlert: React.FC<PerformanceAlertProps> = ({ selectedBloc
     </CardHeader>
     <CardContent className="space-y-4">
       {selectedBlocks.map((blockId) => {
-        const block = blockData[blockId];
-        const performance = block.performance.monthly;
-        const completionRate = Math.round((block.tasks.completed / block.tasks.total) * 100);
+        const block: Block = blockData[blockId];
+
+        if (!block) return null;
+
+        // Use correct properties from Block interface
+        const performance = block.performanceMonthly ?? 0;
+        const completionRate = block.tasksTotal
+          ? Math.round((block.tasksCompleted ?? 0 / block.tasksTotal) * 100)
+          : 0;
+        const employeesCount = block.employeesCount ?? 0;
+        const vehiclesCount = block.vehiclesCount ?? 1; // prevent divide by 0
 
         const bgClass =
           performance >= 85
@@ -43,14 +57,14 @@ export const PerformanceAlert: React.FC<PerformanceAlertProps> = ({ selectedBloc
                 "Consider this team as a benchmark for others",
                 "Document successful strategies for knowledge sharing",
                 ...(completionRate < 90
-                  ? [`Focus on completing remaining ${block.tasks.total - block.tasks.completed} pending tasks`]
+                  ? [`Focus on completing remaining ${block.tasksTotal! - (block.tasksCompleted ?? 0)} pending tasks`]
                   : []),
               ]
             : performance >= 75
             ? [
                 "Analyze workflow bottlenecks causing delays",
                 "Provide extra training for low performers",
-                `Review resource allocation - ratio: ${(block.employees / block.vehicles).toFixed(1)} employees per vehicle`,
+                `Review resource allocation - ratio: ${(employeesCount / vehiclesCount).toFixed(1)} employees per vehicle`,
                 "Implement weekly progress reviews",
               ]
             : [

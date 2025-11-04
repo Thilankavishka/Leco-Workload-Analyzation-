@@ -1,3 +1,8 @@
+/**
+ * employee-performance-summary.tsx
+ * 
+ * @update 11/04/2025
+ */
 import React from "react";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -10,26 +15,31 @@ interface PerformanceProps {
 }
 
 export const EmployeePerformanceSummary: React.FC<PerformanceProps> = ({ block, employee }) => {
+  const performance = employee.performance ?? 0;
+
   const performanceCategory =
-    employee.performance >= 90
+    performance >= 90
       ? "Excellent"
-      : employee.performance >= 80
+      : performance >= 80
       ? "Good"
-      : employee.performance >= 70
+      : performance >= 70
       ? "Satisfactory"
       : "Needs Improvement";
 
   const categoryColor =
-    employee.performance >= 90
+    performance >= 90
       ? "text-green-600"
-      : employee.performance >= 80
+      : performance >= 80
       ? "text-blue-600"
-      : employee.performance >= 70
+      : performance >= 70
       ? "text-yellow-600"
       : "text-red-600";
 
-  const teamAverage = block.staff.reduce((acc, e) => acc + e.performance, 0) / block.staff.length;
-  const employeeRank = block.staff.map((e) => e.performance).sort((a, b) => b - a).indexOf(employee.performance) + 1;
+  const staff = block.staff ?? [];
+  const teamTotal = staff.reduce((acc, e) => acc + (e.performance ?? 0), 0);
+  const teamAverage = staff.length ? teamTotal / staff.length : 0;
+  const sortedPerformances = staff.map((e) => e.performance ?? 0).sort((a, b) => b - a);
+  const employeeRank = sortedPerformances.indexOf(performance) + 1;
 
   return (
     <Card className="shadow-md">
@@ -45,13 +55,13 @@ export const EmployeePerformanceSummary: React.FC<PerformanceProps> = ({ block, 
           <h3 className="font-semibold text-lg mb-3 text-gray-900">📊 Performance Summary</h3>
           <div className="bg-gray-50 p-4 rounded-lg space-y-2 text-gray-700">
             <p>
-              <strong>Overall Rating:</strong> {employee.performance}% - <span className={categoryColor}>{performanceCategory}</span>
+              <strong>Overall Rating:</strong> {performance}% - <span className={categoryColor}>{performanceCategory}</span>
             </p>
             <p>
-              <strong>Team Ranking:</strong> #{employeeRank} out of {block.staff.length} members
+              <strong>Team Ranking:</strong> #{employeeRank} out of {staff.length} members
             </p>
             <p>
-              <strong>Performance vs Team Average:</strong> {(employee.performance - teamAverage).toFixed(1)}% {employee.performance > teamAverage ? "above" : "below"} average
+              <strong>Performance vs Team Average:</strong> {(performance - teamAverage).toFixed(1)}% {performance > teamAverage ? "above" : "below"} average
             </p>
           </div>
         </div>
@@ -60,14 +70,14 @@ export const EmployeePerformanceSummary: React.FC<PerformanceProps> = ({ block, 
         <div>
           <h3 className="font-semibold text-lg mb-3 text-gray-900">💪 Key Strengths</h3>
           <ul className="list-disc list-inside space-y-2 text-gray-700 ml-2">
-            {employee.performance >= 90 ? (
+            {performance >= 90 ? (
               <>
                 <li>Consistently exceeds performance expectations</li>
-                <li>Strong technical expertise in {employee.role.toLowerCase()}</li>
+                <li>Strong technical expertise in {employee.role ? employee.role.toLowerCase() : 'their role'}</li>
                 <li>Reliable team member and potential mentor</li>
                 <li>Excellent work quality and efficiency</li>
               </>
-            ) : employee.performance >= 80 ? (
+            ) : performance >= 80 ? (
               <>
                 <li>Meets performance standards reliably</li>
                 <li>Shows good technical competence in assigned tasks</li>
@@ -86,13 +96,13 @@ export const EmployeePerformanceSummary: React.FC<PerformanceProps> = ({ block, 
         <div>
           <h3 className="font-semibold text-lg mb-3 text-gray-900">🎯 Development Areas</h3>
           <ul className="list-disc list-inside space-y-2 text-gray-700 ml-2">
-            {employee.performance >= 90 ? (
+            {performance >= 90 ? (
               <>
                 <li>Consider leadership or mentoring responsibilities</li>
                 <li>Opportunity for advanced technical certifications</li>
                 <li>Lead special projects or training initiatives</li>
               </>
-            ) : employee.performance >= 80 ? (
+            ) : performance >= 80 ? (
               <>
                 <li>Focus on consistency in high-pressure situations</li>
                 <li>Enhance speed without compromising quality</li>
@@ -112,7 +122,7 @@ export const EmployeePerformanceSummary: React.FC<PerformanceProps> = ({ block, 
         <div>
           <h3 className="font-semibold text-lg mb-3 text-gray-900">✅ Recommended Actions</h3>
           <div className="space-y-3">
-            {employee.performance >= 90 ? (
+            {performance >= 90 ? (
               <>
                 <Alert className="border-green-500 bg-green-50">
                   <AlertDescription className="text-gray-700">
@@ -125,7 +135,7 @@ export const EmployeePerformanceSummary: React.FC<PerformanceProps> = ({ block, 
                   </AlertDescription>
                 </Alert>
               </>
-            ) : employee.performance >= 80 ? (
+            ) : performance >= 80 ? (
               <>
                 <Alert className="border-blue-500 bg-blue-50">
                   <AlertDescription className="text-gray-700">

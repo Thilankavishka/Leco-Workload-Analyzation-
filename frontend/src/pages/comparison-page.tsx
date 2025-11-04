@@ -1,3 +1,9 @@
+/**
+ * comparison-page.tsx
+ * 
+ * @update 11/04/2025
+ */
+
 import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -14,42 +20,56 @@ const ComparisonPage: React.FC = () => {
   // Toggle block selection
   const toggleBlock = (blockId: string) => {
     setSelectedBlocks((prev) =>
-      prev.includes(blockId) ? prev.filter((id) => id !== blockId) : [...prev, blockId]
+      prev.includes(blockId)
+        ? prev.filter((id) => id !== blockId)
+        : [...prev, blockId]
     );
   };
 
   // Prepare bar chart data
-  const comparisonData = useMemo(
-    () =>
-      selectedBlocks.map((blockId) => {
+  const comparisonData = useMemo(() => {
+    return selectedBlocks
+      .map((blockId) => {
         const block = blockData[blockId];
+        if (!block || !block.tasksTotal) return null; // guard against undefined
+
         return {
-          block: block.name.split(" - ")[0],
-          performance: block.performance.monthly,
-          completion: Math.round((block.tasks.completed / block.tasks.total) * 100),
-          employees: block.employees,
-          vehicles: block.vehicles,
+          block: block.name?.split(" - ")[0] ?? "Unknown",
+          performance: block.performanceMonthly ?? 0,
+          completion: Math.round(
+            ((block.tasksCompleted ?? 0) / (block.tasksTotal ?? 1)) * 100
+          ),
+          employees: block.employeesCount ?? 0,
+          vehicles: block.vehiclesCount ?? 0,
         };
-      }),
-    [selectedBlocks]
-  );
+      })
+      .filter((b): b is NonNullable<typeof b> => b !== null); // remove nulls
+  }, [selectedBlocks]);
 
   // Prepare radar chart data
   const radarData = useMemo(() => {
     if (selectedBlocks.length === 0) return [];
+
     return [
       {
         metric: "Performance",
         ...Object.fromEntries(
-          selectedBlocks.map((id) => [blockData[id].name.split(" - ")[0], blockData[id].performance.monthly])
+          selectedBlocks.map((id) => [
+            blockData[id]?.name?.split(" - ")[0] ?? "Unknown",
+            blockData[id]?.performanceMonthly ?? 0,
+          ])
         ),
       },
       {
         metric: "Task Completion",
         ...Object.fromEntries(
           selectedBlocks.map((id) => [
-            blockData[id].name.split(" - ")[0],
-            Math.round((blockData[id].tasks.completed / blockData[id].tasks.total) * 100),
+            blockData[id]?.name?.split(" - ")[0] ?? "Unknown",
+            Math.round(
+              ((blockData[id]?.tasksCompleted ?? 0) /
+                (blockData[id]?.tasksTotal ?? 1)) *
+                100
+            ),
           ])
         ),
       },
@@ -57,8 +77,13 @@ const ComparisonPage: React.FC = () => {
         metric: "Resource Efficiency",
         ...Object.fromEntries(
           selectedBlocks.map((id) => [
-            blockData[id].name.split(" - ")[0],
-            Math.min(95, (blockData[id].employees / blockData[id].vehicles) * 10),
+            blockData[id]?.name?.split(" - ")[0] ?? "Unknown",
+            Math.min(
+              95,
+              ((blockData[id]?.employeesCount ?? 0) /
+                (blockData[id]?.vehiclesCount ?? 1)) *
+                10
+            ),
           ])
         ),
       },
@@ -76,7 +101,9 @@ const ComparisonPage: React.FC = () => {
           >
             ← Back to Block Details
           </button>
-          <h1 className="text-2xl font-bold text-gray-900">Deep Block Comparison</h1>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Deep Block Comparison
+          </h1>
           <div className="w-32" />
         </div>
       </header>
@@ -92,7 +119,10 @@ const ComparisonPage: React.FC = () => {
             <PerformanceBarChart data={comparisonData} />
 
             {/* Radar Chart */}
-            <RadarComparisonChart selectedBlocks={selectedBlocks} radarData={radarData} />
+            <RadarComparisonChart
+              selectedBlocks={selectedBlocks}
+              radarData={radarData}
+            />
 
             {/* Performance Alerts / Recommendations */}
             <PerformanceAlert selectedBlocks={selectedBlocks} />

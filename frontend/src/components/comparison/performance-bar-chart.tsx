@@ -1,3 +1,8 @@
+/**
+ * performance-bar-chart.tsx
+ * 
+ * @update 11/04/2025
+ */
 import React from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Bar } from "recharts";

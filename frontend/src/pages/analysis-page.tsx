@@ -1,3 +1,9 @@
+/**
+ * analysis-page.tsx
+ * 
+ * @update 11/04/2025
+ */
+
 import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Filter, ChevronDown, Users, Car, Award, TrendingUp } from "lucide-react";
@@ -17,32 +23,27 @@ const AnalysisPage: React.FC = () => {
   // Prepare metrics dynamically
   const metrics = selectedBlock
     ? [
-        {
-          label: "Total Employees",
-          value: blockData[selectedBlock].employees,
-          icon: <Users className="w-10 h-10 text-blue-600" />,
-        },
-        {
-          label: "Vehicles Assigned",
-          value: blockData[selectedBlock].vehicles,
-          icon: <Car className="w-10 h-10 text-green-600" />,
-        },
-        {
-          label: "Tasks Completed",
-          value: `${blockData[selectedBlock].tasks.completed}/${blockData[selectedBlock].tasks.total}`,
-          icon: <Award className="w-10 h-10 text-purple-600" />,
-        },
-        {
-          label: "Completion Rate",
-          value: `${Math.round(
-            (blockData[selectedBlock].tasks.completed /
-              blockData[selectedBlock].tasks.total) *
-              100
-          )}%`,
-          icon: <TrendingUp className="w-10 h-10 text-orange-600" />,
-        },
-      ]
-    : [];
+      {
+        label: "Total Employees",
+        value: blockData[selectedBlock].employeesCount,
+        icon: <Users className="w-10 h-10 text-blue-600" />,
+      },
+      {
+        label: "Vehicles Assigned",
+        value: blockData[selectedBlock].vehiclesCount,
+        icon: <Car className="w-10 h-10 text-green-600" />,
+      },
+      {
+        label: "Tasks Completed",
+        value: `${blockData[selectedBlock].tasksCompleted}/${blockData[selectedBlock].tasksTotal}`,
+        icon: <Award className="w-10 h-10 text-purple-600" />,
+      },
+      {
+        label: "Completion Rate",
+        value: `${Math.round(((blockData[selectedBlock]?.tasksCompleted ?? 0) / (blockData[selectedBlock]?.tasksTotal || 1)) * 100)}%`,
+        icon: <TrendingUp className="w-10 h-10 text-orange-600" />,
+      },
+    ] : [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
