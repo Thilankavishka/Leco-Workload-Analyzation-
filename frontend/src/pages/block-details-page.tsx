@@ -1,7 +1,7 @@
 /**
  * block-details-page.tsx
  * 
- * @update 11/04/2025
+ * @update 11/05/2025
  */
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
