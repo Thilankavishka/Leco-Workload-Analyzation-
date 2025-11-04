@@ -1,3 +1,8 @@
+/**
+ * performance-chart.tsx
+ * 
+ * @update 11/04/2025
+ */
 import React from "react";
 import {
   BarChart,
