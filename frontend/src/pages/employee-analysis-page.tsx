@@ -1,58 +1,117 @@
 /**
  * employee-analysis-page.tsx
  * 
- * @update 11/04/2025
+ * @update 11/05/2025
  */
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import blockData from "@/data/block-data";
+import axiosInstance from "@/common/axios-instance";
 import { EmployeeTasks } from "@/components/employee-analysis/employee-tasks";
 import { EmployeeInfo } from "@/components/employee-analysis/employee-info";
 import { EmployeePerformanceSummary } from "@/components/employee-analysis/employee-performance-summary";
-import type { Block, Employee } from "@/common/type";
+import { apiSummary } from "@/common/summary-api";
+
+export type EmployeeWithBlockAndTasks = {
+  id: string;
+  name: string;
+  phone: string;
+  role: string;
+  performance: number;
+  tasksCompleted: number;
+  tasksAssigned: number;
+  blockId: string;
+  createdAt: string;
+  updatedAt: string;
+  block: {
+    id: string;
+    name: string;
+    employeesCount: number;
+    vehiclesCount: number;
+    tasksCompleted: number;
+    tasksTotal: number;
+    performanceMonthly: number;
+    createdAt: string;
+    updatedAt: string;
+  };
+  taskAssignments: {
+    id: string;
+    taskId: string;
+    employeeId: string;
+    task: {
+      id: string;
+      name: string;
+      progress: number;
+      priority: "LOW" | "MEDIUM" | "HIGH";
+      startDate: string;
+      endDate: string | null;
+      blockId: string;
+      createdAt: string;
+      updatedAt: string;
+    };
+  }[];
+};
 
 const EmployeeAnalysisPage: React.FC = () => {
   const navigate = useNavigate();
   const { blockId, employeeId } = useParams<{ blockId: string; employeeId: string }>();
+  const [data, setData] = useState<EmployeeWithBlockAndTasks | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
 
-  // Early exit if missing params
-  if (!blockId || !employeeId) return null;
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const response = await axiosInstance.get<EmployeeWithBlockAndTasks>(
+        apiSummary.blocks.getEmployee(blockId!, employeeId!)
+      );
+      setData(response.data);
+      setError(null);
+    } catch (err: any) {
+      console.error(err);
+      setError("Failed to fetch employee analysis data.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const block: Block | undefined = blockData[blockId];
-  const employee: Employee | undefined = block?.staff?.find(
-    (e) => e.id === employeeId
-  );
+  useEffect(() => {
+    if (!blockId || !employeeId) return;
+    fetchData();
+  }, [blockId, employeeId]);
 
-  // Exit early if not found
-  if (!block || !employee) return null;
+  // Extract block and employee from data
+  const employee = data;
+  const block = data?.block;
 
-  // Safely handle undefined arrays and task fields
+  // Tasks from taskAssignments
   const employeeTasks = useMemo(() => {
-    return (block.ongoingTasks ?? []).filter((task) => {
-      const assignedList = task.assignedTo ?? [];
-      return assignedList.includes(employee.id ?? "");
-    });
-  }, [block.ongoingTasks, employee.id]);
+    if (!employee) return [];
+    return employee.taskAssignments.map((ta) => ta.task);
+  }, [employee]);
 
   // Filter tasks by date range
   const filteredTasks = useMemo(() => {
+    if (!employeeTasks.length) return [];
     return employeeTasks.filter((task) => {
       if (!startDate && !endDate) return true;
-
       const taskStart = new Date(task.startDate);
       const taskEnd = task.endDate ? new Date(task.endDate) : new Date();
       const filterStart = startDate ? new Date(startDate) : new Date(0);
       const filterEnd = endDate ? new Date(endDate) : new Date();
-
       return taskStart >= filterStart && taskEnd <= filterEnd;
     });
   }, [employeeTasks, startDate, endDate]);
 
+  if (loading) return <div className="p-6 text-center">Loading...</div>;
+  if (error) return <div className="p-6 text-center text-red-600">{error}</div>;
+  if (!employee || !block)
+    return <div className="p-6 text-center text-red-600">No employee or block found.</div>;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
-      {/* Header */}
       <header className="bg-white shadow-sm border-b sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <button
@@ -61,18 +120,13 @@ const EmployeeAnalysisPage: React.FC = () => {
           >
             ← Back to Block Details
           </button>
-          <h1 className="text-2xl font-bold text-gray-900">
-            Employee Performance Analysis
-          </h1>
+          <h1 className="text-2xl font-bold text-gray-900">Employee Performance Analysis</h1>
           <div className="w-32" />
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-8 space-y-8">
-        {/* Employee Info */}
         <EmployeeInfo block={block} employee={employee} />
-
-        {/* Employee Tasks with Date Filter */}
         <EmployeeTasks
           employee={employee}
           tasks={filteredTasks}
@@ -81,8 +135,6 @@ const EmployeeAnalysisPage: React.FC = () => {
           setStartDate={setStartDate}
           setEndDate={setEndDate}
         />
-
-        {/* Performance Summary & Recommendations */}
         <EmployeePerformanceSummary block={block} employee={employee} />
       </main>
     </div>
