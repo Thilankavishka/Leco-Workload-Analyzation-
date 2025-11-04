@@ -1,3 +1,9 @@
+/**
+ * comparison-page.tsx
+ * 
+ * @update 11/04/2025
+ */
+
 import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Alert, AlertDescription } from "@/components/ui/alert";
