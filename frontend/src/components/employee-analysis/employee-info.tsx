@@ -1,3 +1,8 @@
+/**
+ * employee-info.tsx
+ * 
+ * @update 11/04/2025
+ */
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Phone, Building2, Award, UserCheck } from "lucide-react";
 
