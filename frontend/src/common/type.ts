@@ -1,3 +1,8 @@
+/**
+ * type.ts
+ * 
+ * @updated 11/04/2025
+ */
 export type Priority = "HIGH" | "MEDIUM" | "LOW" | "high" | "medium" | "low"
 
 export interface Block {
