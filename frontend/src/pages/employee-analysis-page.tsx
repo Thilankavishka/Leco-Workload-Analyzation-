@@ -12,27 +12,35 @@ const EmployeeAnalysisPage: React.FC = () => {
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
 
+  // Early exit if missing params
   if (!blockId || !employeeId) return null;
 
   const block: Block | undefined = blockData[blockId];
-  const employee: Employee | undefined = block?.staff.find((e) => e.id === employeeId);
+  const employee: Employee | undefined = block?.staff?.find(
+    (e) => e.id === employeeId
+  );
 
+  // Exit early if not found
   if (!block || !employee) return null;
 
-  // Filter tasks assigned to employee
-  const employeeTasks = useMemo(() => 
-    block.ongoingTasks.filter((task) => task.assignedTo.includes(employee.id)),
-    [block.ongoingTasks, employee.id]
-  );
+  // Safely handle undefined arrays and task fields
+  const employeeTasks = useMemo(() => {
+    return (block.ongoingTasks ?? []).filter((task) => {
+      const assignedList = task.assignedTo ?? [];
+      return assignedList.includes(employee.id ?? "");
+    });
+  }, [block.ongoingTasks, employee.id]);
 
   // Filter tasks by date range
   const filteredTasks = useMemo(() => {
     return employeeTasks.filter((task) => {
       if (!startDate && !endDate) return true;
+
       const taskStart = new Date(task.startDate);
       const taskEnd = task.endDate ? new Date(task.endDate) : new Date();
       const filterStart = startDate ? new Date(startDate) : new Date(0);
       const filterEnd = endDate ? new Date(endDate) : new Date();
+
       return taskStart >= filterStart && taskEnd <= filterEnd;
     });
   }, [employeeTasks, startDate, endDate]);
@@ -48,7 +56,9 @@ const EmployeeAnalysisPage: React.FC = () => {
           >
             ← Back to Block Details
           </button>
-          <h1 className="text-2xl font-bold text-gray-900">Employee Performance Analysis</h1>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Employee Performance Analysis
+          </h1>
           <div className="w-32" />
         </div>
       </header>
