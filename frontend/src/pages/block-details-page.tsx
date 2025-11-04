@@ -3,7 +3,7 @@
  * 
  * @update 11/04/2025
  */
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   Users,
@@ -35,20 +35,35 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import blockData from "@/data/block-data";
+import axiosInstance from "@/common/axios-instance";
+import { apiSummary } from "@/common/summary-api";
 
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
 
 const BlockDetailsPage: React.FC = () => {
+  const [blockData, setBlockData] = useState<Record<string, any>>({});
   const navigate = useNavigate();
   const { blockId } = useParams<{ blockId: string }>();
   const [searchTerm, setSearchTerm] = useState("");
 
-  const block = blockId ? blockData[blockId] : null;
-  if (!block) return null;
+
+  // Fetch block data from API
+  const fetchBlockData = async () => {
+    try {
+      const response = await axiosInstance.get(apiSummary.blocks.getById(blockId!));
+      setBlockData(response.data);
+    } catch (error) {
+      console.error("Error fetching block data:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchBlockData();
+  }, []);
+
 
   // Filtered staff based on search
-  const filteredStaff = (block.staff ?? []).filter((employee) =>
+  const filteredStaff = (blockData.staff ?? []).filter((employee: { name: string; }) =>
     employee.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -56,21 +71,21 @@ const BlockDetailsPage: React.FC = () => {
   const metrics = [
     {
       label: "Total Employees",
-      value: block.employeesCount,
+      value: blockData.employeesCount,
       icon: <Users className="w-5 h-5" />,
       gradient: "from-blue-500 to-blue-600",
       textColor: "text-white",
     },
     {
       label: "Vehicles",
-      value: block.vehiclesCount,
+      value: blockData.vehiclesCount,
       icon: <Car className="w-5 h-5" />,
       gradient: "from-green-500 to-green-600",
       textColor: "text-white",
     },
     {
       label: "Task Completion",
-      value: `${Math.round(((block.tasksCompleted ?? 0) / (block.tasksTotal ?? 1)) * 100)}%`,
+      value: `${Math.round(((blockData.tasksCompleted ?? 0) / (blockData.tasksTotal ?? 1)) * 100)}%`,
       icon: <Award className="w-5 h-5" />,
       gradient: "from-purple-500 to-purple-600",
       textColor: "text-white",
@@ -89,7 +104,7 @@ const BlockDetailsPage: React.FC = () => {
             <ArrowRight className="w-4 h-4 rotate-180" />
             <span>Back to Dashboard</span>
           </button>
-          <h1 className="text-2xl font-bold text-gray-900">{block.name}</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{blockData.name}</h1>
           <button
             onClick={() => navigate("/comparison")}
             className="px-6 py-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white rounded-lg font-semibold transition-all"
@@ -139,7 +154,7 @@ const BlockDetailsPage: React.FC = () => {
                 <h3 className="font-semibold text-gray-900 mb-4">Performance Comparison</h3>
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart
-                    data={(block.staff ?? []).map((s) => ({
+                    data={(blockData.staff ?? []).map((s: { name: string; performance: any; }) => ({
                       name: s.name.split(" ")[0],
                       performance: s.performance ?? 0,
                     }))}
@@ -160,7 +175,7 @@ const BlockDetailsPage: React.FC = () => {
                 <ResponsiveContainer width="100%" height={300}>
                   <PieChart>
                     <Pie
-                      data={(block.staff ?? []).map((s) => ({
+                      data={(blockData.staff ?? []).map((s: { name: string; tasksCompleted: any; }) => ({
                         name: s.name.split(" ")[0],
                         value: s.tasksCompleted,
                       }))}
@@ -174,7 +189,7 @@ const BlockDetailsPage: React.FC = () => {
                       fill="#8884d8"
                       dataKey="value"
                     >
-                      {(block.staff ?? []).map((_, index) => (
+                      {(blockData.staff ?? []).map((_: any, index: number) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
@@ -198,14 +213,17 @@ const BlockDetailsPage: React.FC = () => {
 
             {/* Employee Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {filteredStaff.map((employee) => {
-                const successRate = Math.round(
-                  (employee.tasksCompleted ? employee.tasksCompleted : 0) / (employee.tasksAssigned ? employee.tasksAssigned : 0) * 100
-                );
-                const initials = employee.name
+              {filteredStaff.map((employee: { tasksCompleted: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; tasksAssigned: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; name: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; id: React.Key | null | undefined; role: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; performance: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; }) => {
+                const completed = Number(employee.tasksCompleted ?? 0);
+                const assigned = Number(employee.tasksAssigned ?? 0);
+                const successRate = assigned > 0 ? Math.round((completed / assigned) * 100) : 0;
+                const nameStr = String(employee.name ?? "");
+                const initials = nameStr
                   .split(" ")
-                  .map((n) => n[0])
-                  .join("");
+                  .filter(Boolean)
+                  .map((n) => n.charAt(0))
+                  .join("")
+                  .toUpperCase();
 
                 return (
                   <Card
@@ -220,7 +238,7 @@ const BlockDetailsPage: React.FC = () => {
                         <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
                           {initials}
                         </div>
-                        <span>{employee.name}</span>
+                        <span>{nameStr}</span>
                       </CardTitle>
                       <CardDescription className="text-sm text-gray-600">
                         {employee.role}
@@ -271,7 +289,7 @@ const BlockDetailsPage: React.FC = () => {
         <div className="mb-8">
           <h3 className="text-xl font-semibold text-gray-900 mb-4">Ongoing Tasks</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {(block.ongoingTasks ?? []).map((task) => (
+            {(blockData.ongoingTasks ?? []).map((task: { id: React.Key | null | undefined; name: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; assignedTo: string | any[]; progress: any; priority: string; startDate: any; endDate: any; }) => (
               <Card
                 key={task.id}
                 className="cursor-pointer hover:shadow-lg transition-shadow"
@@ -295,10 +313,10 @@ const BlockDetailsPage: React.FC = () => {
                     <p className="text-sm text-gray-600">Priority</p>
                     <span
                       className={`px-2 py-1 rounded text-xs font-semibold ${task.priority === "high"
-                          ? "bg-red-100 text-red-700"
-                          : task.priority === "medium"
-                            ? "bg-yellow-100 text-yellow-700"
-                            : "bg-green-100 text-green-700"
+                        ? "bg-red-100 text-red-700"
+                        : task.priority === "medium"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : "bg-green-100 text-green-700"
                         }`}
                     >
                       {task.priority
@@ -325,7 +343,7 @@ const BlockDetailsPage: React.FC = () => {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={block.performanceHistory}>
+              <LineChart data={blockData.performanceHistory}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="period" />
                 <YAxis domain={[0, 100]} />
