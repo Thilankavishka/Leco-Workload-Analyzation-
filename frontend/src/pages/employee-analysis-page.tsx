@@ -9,6 +9,7 @@ import axiosInstance from "@/common/axios-instance";
 import { EmployeeTasks } from "@/components/employee-analysis/employee-tasks";
 import { EmployeeInfo } from "@/components/employee-analysis/employee-info";
 import { EmployeePerformanceSummary } from "@/components/employee-analysis/employee-performance-summary";
+import { apiSummary } from "@/common/summary-api";
 
 export type EmployeeWithBlockAndTasks = {
   id: string;
@@ -64,7 +65,7 @@ const EmployeeAnalysisPage: React.FC = () => {
     try {
       setLoading(true);
       const response = await axiosInstance.get<EmployeeWithBlockAndTasks>(
-        `/blocks/${blockId}/employee/${employeeId}`
+        apiSummary.blocks.getEmployee(blockId!, employeeId!)
       );
       setData(response.data);
       setError(null);
