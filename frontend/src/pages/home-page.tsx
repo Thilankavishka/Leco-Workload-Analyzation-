@@ -53,15 +53,15 @@ const HomePage: React.FC = () => {
   };
 
   const totalTasks = Object.values(blockData).reduce(
-    (acc, block) => acc + block.tasks.total,
+    (acc, block) => acc + (block.tasksTotal ?? 0),
     0
   );
   const completedTasks = Object.values(blockData).reduce(
-    (acc, block) => acc + block.tasks.completed,
+    (acc, block) => acc + (block.tasksCompleted ?? 0),
     0
   );
   const totalEmployees = Object.values(blockData).reduce(
-    (acc, block) => acc + block.employees,
+    (acc, block) => acc + (block.employeesCount ?? 0),
     0
   );
 
@@ -209,7 +209,7 @@ const HomePage: React.FC = () => {
                       <div className="flex-1 bg-blue-50/50 border border-blue-100 rounded-2xl p-4 flex flex-col items-center justify-center">
                         <p className="text-sm text-blue-600 font-medium text-center">Overall Progress</p>
                         <p className="text-2xl font-bold text-blue-700">
-                          {Math.round((block.tasks.completed / block.tasks.total) * 100)}%
+                          {block.tasksTotal ? `${Math.round(((block.tasksCompleted ?? 0) / block.tasksTotal) * 100)}%` : "0%"}
                         </p>
                       </div>
 
@@ -224,7 +224,7 @@ const HomePage: React.FC = () => {
                       {/* Performance */}
                       <div className="flex-1 bg-green-50/50 border border-green-100 rounded-2xl p-4 flex flex-col items-center justify-center">
                         <p className="text-sm text-green-600 font-medium text-center">Performance</p>
-                        <p className="text-2xl font-bold text-green-700">{block.performance.monthly}%</p>
+                        <p className="text-2xl font-bold text-green-700">{block.performanceMonthly}%</p>
                       </div>
                     </div>
                   </CardContent>
