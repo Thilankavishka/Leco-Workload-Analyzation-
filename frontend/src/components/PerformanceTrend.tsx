@@ -13,7 +13,7 @@ import {
 import { performanceAPI, taskAPI } from "../services/api";
 
 interface TrendData {
-  month: string;
+  period: string;
   completion: number;
   handover: number;
 }
@@ -24,24 +24,62 @@ const PerformanceTrend: React.FC = () => {
   useEffect(() => {
     const fetchTrendData = async (): Promise<void> => {
       try {
-        await Promise.all([performanceAPI.getAll(), taskAPI.getAll()]); // Fetch but ignore for mock
+        const [perfRes, tasksRes] = await Promise.all([
+          performanceAPI.getAll(),
+          taskAPI.getAll(),
+        ]);
+        const perfData = perfRes.data;
+        const tasks = tasksRes.data;
 
-        // Mock data (replace with real aggregation from API response if needed)
-        const trendData: TrendData[] = [
-          { month: "Jan", completion: 65, handover: 40 },
-          { month: "Feb", completion: 70, handover: 45 },
-          { month: "Mar", completion: 75, handover: 50 },
-          { month: "Apr", completion: 80, handover: 55 },
-          { month: "May", completion: 85, handover: 60 },
-        ];
-        setData(trendData);
+        // Use raw database performance records directly (no aggregation)
+        // Assume one record per period; if duplicates, take the latest/first
+        const uniquePeriods = new Map<string, any>();
+        perfData.forEach((record: any) => {
+          const period = record.period || "Unknown";
+          if (!uniquePeriods.has(period)) {
+            uniquePeriods.set(period, record);
+          }
+        });
+
+        const rawTrendData: TrendData[] = Array.from(uniquePeriods.entries())
+          .map(([period, record]) => ({
+            period,
+            completion: record.value || 0,
+            handover: 0, // Will set below
+          }))
+          .sort((a, b) => a.period.localeCompare(b.period)); // Sort by period string
+
+        // For handover, derive from raw tasks data: e.g., ratio of completed tasks (overall, since no per-period dates)
+        // To make per-period, would need task dates parsed, but using raw overall for simplicity
+        const totalCompleted = tasks.filter(
+          (task: any) => task.progress === 100
+        ).length;
+        const totalHandover = Math.round(
+          (totalCompleted / (tasks.length || 1)) * 100
+        );
+        rawTrendData.forEach((item) => {
+          item.handover = totalHandover;
+        });
+
+        setData(rawTrendData);
       } catch (error) {
         console.error("Error fetching trend data:", error);
+        setData([]); // No fallback mock; show empty chart if no data
       }
     };
 
     fetchTrendData();
   }, []);
+
+  if (data.length === 0) {
+    return (
+      <div className="bg-white p-8 rounded-xl shadow-lg text-center">
+        <p className="text-gray-500">
+          No performance data available yet. Check back after adding records.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white p-8 rounded-xl shadow-lg">
@@ -54,7 +92,7 @@ const PerformanceTrend: React.FC = () => {
           margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
         >
           <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-          <XAxis dataKey="month" stroke="#6b7280" fontSize={14} />
+          <XAxis dataKey="period" stroke="#6b7280" fontSize={14} />
           <YAxis stroke="#6b7280" fontSize={14} />
           <Tooltip
             contentStyle={{
@@ -80,7 +118,8 @@ const PerformanceTrend: React.FC = () => {
         </BarChart>
       </ResponsiveContainer>
       <p className="text-sm text-gray-500 mt-4 text-center">
-        Trend analysis for the last 5 months. Hover for details.
+        Trend based on raw performance history records from the database.
+        Handover derived from total completed tasks.
       </p>
     </div>
   );
