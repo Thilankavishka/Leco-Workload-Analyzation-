@@ -123,29 +123,61 @@ const EmployeeDetails: React.FC = () => {
           <h3 className="text-xl font-semibold text-gray-900 mb-4">
             Assigned Tasks
           </h3>
-          <ul className="space-y-3 max-h-64 overflow-y-auto">
-            {tasks.map((task: any) => (
-              <li
-                key={task.id}
-                className="flex justify-between items-center p-3 bg-gray-50 rounded-lg"
-              >
-                <span className="font-medium text-gray-900">{task.name}</span>
-                <span
-                  className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    task.progress === 100
-                      ? "bg-green-100 text-green-800"
-                      : task.progress > 70
-                      ? "bg-blue-100 text-blue-800"
-                      : task.progress > 50
-                      ? "bg-yellow-100 text-yellow-800"
-                      : "bg-red-100 text-red-800"
-                  }`}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {tasks.map((task: any) => {
+              const status = task.progress === 100 ? "Completed" : "Ongoing";
+              const endDate = task.endDate || "N/A";
+
+              return (
+                <div
+                  key={task.id}
+                  className="bg-gray-50 p-4 rounded-lg border border-gray-200"
                 >
-                  {task.progress}%
-                </span>
-              </li>
-            ))}
-          </ul>
+                  <h4 className="font-semibold text-gray-900 mb-2">
+                    {task.name}
+                  </h4>
+                  <div className="mb-2">
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div
+                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${task.progress}%` }}
+                      />
+                    </div>
+                    <p className="text-sm text-gray-600 mt-1">
+                      {task.progress}% Progress
+                    </p>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-1">
+                    <span className="font-medium">Status:</span>{" "}
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs ${
+                        status === "Completed"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-yellow-100 text-yellow-800"
+                      }`}
+                    >
+                      {status}
+                    </span>
+                  </p>
+                  <p className="text-sm text-gray-600 mb-1">
+                    <span className="font-medium">Start:</span>{" "}
+                    {new Date(task.startDate).toLocaleDateString()}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    <span className="font-medium">End:</span>{" "}
+                    {endDate !== "N/A"
+                      ? new Date(endDate).toLocaleDateString()
+                      : "Ongoing"}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+          {tasks.length === 0 && (
+            <p className="text-center text-gray-500 py-8">
+              No tasks assigned yet.
+            </p>
+          )}
         </div>
 
         <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 mb-8">
