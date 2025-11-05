@@ -35,14 +35,35 @@ const EmployeeDetails: React.FC = () => {
         }
         setTasks(assignRes.data.map((assign: any) => assign.task));
 
-        // Mock performance trend data
-        setPerformanceData([
-          { month: "Jan", performance: 70 },
-          { month: "Feb", performance: 75 },
-          { month: "Mar", performance: 80 },
-          { month: "Apr", performance: 85 },
-          { month: "May", performance: 90 },
-        ]);
+        // Derive performance trend from tasks: average progress grouped by month of startDate
+        const tasksWithMonth = assignRes.data.map((assign: any) => {
+          const startDate = new Date(assign.task.startDate);
+          const month = startDate.toLocaleDateString("en-US", {
+            month: "short",
+            year: "numeric",
+          });
+          return { month, progress: assign.task.progress || 0 };
+        });
+
+        const monthlyAvg = tasksWithMonth.reduce((acc: any, current: any) => {
+          if (!acc[current.month]) {
+            acc[current.month] = { total: 0, count: 0 };
+          }
+          acc[current.month].total += current.progress;
+          acc[current.month].count += 1;
+          return acc;
+        }, {});
+
+        const trendData = Object.entries(monthlyAvg)
+          .map(([month, stats]) => ({
+            month,
+            performance: Math.round(stats.total / stats.count),
+          }))
+          .sort(
+            (a, b) => new Date(a.month).getTime() - new Date(b.month).getTime()
+          );
+
+        setPerformanceData(trendData.length > 0 ? trendData : []);
       } catch (error) {
         console.error("Error fetching employee details:", error);
       }
@@ -204,7 +225,8 @@ const EmployeeDetails: React.FC = () => {
             </BarChart>
           </ResponsiveContainer>
           <p className="text-sm text-gray-500 mt-4 text-center">
-            Monthly performance trend. Aim for consistent growth.
+            Monthly performance trend derived from task progress. Aim for
+            consistent growth.
           </p>
         </div>
       </div>
