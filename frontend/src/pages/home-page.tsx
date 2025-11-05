@@ -35,21 +35,19 @@ import {
 } from "recharts";
 import DashboardCard from "@/components/dashboard-card";
 import { Button } from "@/components/ui/button";
-import axiosInstance from "@/common/axios-instance";
-import { apiSummary } from "@/common/summary-api";
+import { useBlock } from "@/contexts/block-context";
 
 const HomePage: React.FC = () => {
-  const [blockData, setBlockData] = useState<Record<string, any>>({});
+  const {blockData} = useBlock();
+  const [blocks, setBlocks] = useState<Record<string, any>>({});
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [visibleCount, setVisibleCount] = useState<number>(6); // initial visible blocks
   const [expanded, setExpanded] = useState<boolean>(false); // toggle state
 
-  // Fetch block data from API
   const fetchBlockData = async () => {
     try {
-      const response = await axiosInstance.get(apiSummary.blocks.getAll);
-      setBlockData(response.data);
+      setBlocks(blockData);
     } catch (error) {
       console.error("Error fetching block data:", error);
     }
@@ -60,7 +58,7 @@ const HomePage: React.FC = () => {
   }, []);
 
   const dashboardData = {
-    totalBlocks: Object.keys(blockData).length,
+    totalBlocks: Object.keys(blocks).length,
     ongoingProjects: 8,
     completedProjects: 135,
     overallPerformance: [
@@ -74,15 +72,15 @@ const HomePage: React.FC = () => {
   };
 
   // Aggregated data
-  const totalTasks = Object.values(blockData).reduce(
+  const totalTasks = Object.values(blocks).reduce(
     (acc, block) => acc + (block?.tasksTotal ?? 0),
     0
   );
-  const completedTasks = Object.values(blockData).reduce(
+  const completedTasks = Object.values(blocks).reduce(
     (acc, block) => acc + (block?.tasksCompleted ?? 0),
     0
   );
-  const totalEmployees = Object.values(blockData).reduce(
+  const totalEmployees = Object.values(blocks).reduce(
     (acc, block) => acc + (block?.employeesCount ?? 0),
     0
   );
@@ -93,7 +91,7 @@ const HomePage: React.FC = () => {
   };
 
   // Filter blocks by search term safely
-  const filteredBlocks = Object.entries(blockData).filter(
+  const filteredBlocks = Object.entries(blocks).filter(
     ([, block]) =>
       typeof block?.name === "string" &&
       block.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -167,7 +165,7 @@ const HomePage: React.FC = () => {
       </header>
 
       <Button onClick={()=>{
-        console.log(blockData)
+        console.log(blocks)
       }}>
         click
       </Button>
