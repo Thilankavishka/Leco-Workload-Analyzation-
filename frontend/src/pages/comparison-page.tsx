@@ -7,7 +7,7 @@
 import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import blockData from "@/data/block-data";
+import { useBlock } from "@/contexts/block-context";
 import { PerformanceAlert } from "@/components/comparison/performance-alert";
 import { PerformanceBarChart } from "@/components/comparison/performance-bar-chart";
 import { RadarComparisonChart } from "@/components/comparison/radar-comparison-chart";
@@ -16,6 +16,7 @@ import { BlockSelector } from "@/components/comparison/block-selector";
 const ComparisonPage: React.FC = () => {
   const navigate = useNavigate();
   const [selectedBlocks, setSelectedBlocks] = useState<string[]>([]);
+  const {blockData} = useBlock();
 
   // Toggle block selection
   const toggleBlock = (blockId: string) => {
