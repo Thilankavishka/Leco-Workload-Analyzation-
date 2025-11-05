@@ -34,24 +34,30 @@ const BlockPerformanceTrend: React.FC<BlockPerformanceTrendProps> = ({
           period: record.period || "",
           value: record.value || 0,
         }));
-        setTrendData(
-          data.length > 0
-            ? data
-            : [
-                { period: "Jan", value: 65 },
-                { period: "Feb", value: 70 },
-                { period: "Mar", value: 75 },
-                { period: "Apr", value: 80 },
-                { period: "May", value: 85 },
-              ]
-        );
+        // Sort by period string for chronological order
+        data.sort((a, b) => a.period.localeCompare(b.period));
+        setTrendData(data);
       } catch (error) {
         console.error("Error fetching performance trend:", error);
+        setTrendData([]);
       }
     };
 
     if (blockId) fetchTrend();
   }, [blockId]);
+
+  if (trendData.length === 0) {
+    return (
+      <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+        <h3 className="text-xl font-semibold text-gray-900 mb-4">
+          Block Performance Trend (Monthly)
+        </h3>
+        <p className="text-gray-500 text-center py-8">
+          No performance history data available yet. Add records to view trends.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100">
@@ -86,7 +92,8 @@ const BlockPerformanceTrend: React.FC<BlockPerformanceTrendProps> = ({
         </LineChart>
       </ResponsiveContainer>
       <p className="text-sm text-gray-500 mt-4 text-center">
-        Performance value over time. Higher values indicate better efficiency.
+        Performance value over time from database records. Higher values
+        indicate better efficiency.
       </p>
     </div>
   );
