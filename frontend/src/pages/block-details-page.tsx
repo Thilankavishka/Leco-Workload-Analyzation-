@@ -37,21 +37,20 @@ import {
 } from "recharts";
 import axiosInstance from "@/common/axios-instance";
 import { apiSummary } from "@/common/summary-api";
+import { useBlock } from "@/contexts/block-context";
 
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
 
 const BlockDetailsPage: React.FC = () => {
-  const [blockData, setBlockData] = useState<Record<string, any>>({});
+  const { blockData } = useBlock();
+  const [blocks, setBlocks] = useState<Record<string, any>>({});
   const navigate = useNavigate();
   const { blockId } = useParams<{ blockId: string }>();
   const [searchTerm, setSearchTerm] = useState("");
 
-
-  // Fetch block data from API
   const fetchBlockData = async () => {
     try {
-      const response = await axiosInstance.get(apiSummary.blocks.getById(blockId!));
-      setBlockData(response.data);
+      setBlocks(blockData);
     } catch (error) {
       console.error("Error fetching block data:", error);
     }
@@ -61,9 +60,8 @@ const BlockDetailsPage: React.FC = () => {
     fetchBlockData();
   }, []);
 
-
   // Filtered staff based on search
-  const filteredStaff = (blockData.staff ?? []).filter((employee: { name: string; }) =>
+  const filteredStaff = (blocks.staff ?? []).filter((employee: { name: string; }) =>
     employee.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -71,21 +69,21 @@ const BlockDetailsPage: React.FC = () => {
   const metrics = [
     {
       label: "Total Employees",
-      value: blockData.employeesCount,
+      value: blocks.employeesCount,
       icon: <Users className="w-5 h-5" />,
       gradient: "from-blue-500 to-blue-600",
       textColor: "text-white",
     },
     {
       label: "Vehicles",
-      value: blockData.vehiclesCount,
+      value: blocks.vehiclesCount,
       icon: <Car className="w-5 h-5" />,
       gradient: "from-green-500 to-green-600",
       textColor: "text-white",
     },
     {
       label: "Task Completion",
-      value: `${Math.round(((blockData.tasksCompleted ?? 0) / (blockData.tasksTotal ?? 1)) * 100)}%`,
+      value: `${Math.round(((blocks.tasksCompleted ?? 0) / (blocks.tasksTotal ?? 1)) * 100)}%`,
       icon: <Award className="w-5 h-5" />,
       gradient: "from-purple-500 to-purple-600",
       textColor: "text-white",
@@ -104,7 +102,7 @@ const BlockDetailsPage: React.FC = () => {
             <ArrowRight className="w-4 h-4 rotate-180" />
             <span>Back to Dashboard</span>
           </button>
-          <h1 className="text-2xl font-bold text-gray-900">{blockData.name}</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{blocks.name}</h1>
           <button
             onClick={() => navigate("/comparison")}
             className="px-6 py-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white rounded-lg font-semibold transition-all"
@@ -115,7 +113,7 @@ const BlockDetailsPage: React.FC = () => {
       </header>
 
       <button onClick={async () => {
-        const response = await axiosInstance.get(apiSummary.blocks.getEmployee(blockId!, blockData.staff[0].id));
+        const response = await axiosInstance.get(apiSummary.blocks.getEmployee(blockId!, blocks.staff[0].id));
         console.log(response.data);
       }}>
         click
@@ -161,7 +159,7 @@ const BlockDetailsPage: React.FC = () => {
                 <h3 className="font-semibold text-gray-900 mb-4">Performance Comparison</h3>
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart
-                    data={(blockData.staff ?? []).map((s: { name: string; performance: any; }) => ({
+                    data={(blocks.staff ?? []).map((s: { name: string; performance: any; }) => ({
                       name: s.name.split(" ")[0],
                       performance: s.performance ?? 0,
                     }))}
@@ -182,7 +180,7 @@ const BlockDetailsPage: React.FC = () => {
                 <ResponsiveContainer width="100%" height={300}>
                   <PieChart>
                     <Pie
-                      data={(blockData.staff ?? []).map((s: { name: string; tasksCompleted: any; }) => ({
+                      data={(blocks.staff ?? []).map((s: { name: string; tasksCompleted: any; }) => ({
                         name: s.name.split(" ")[0],
                         value: s.tasksCompleted,
                       }))}
@@ -196,7 +194,7 @@ const BlockDetailsPage: React.FC = () => {
                       fill="#8884d8"
                       dataKey="value"
                     >
-                      {(blockData.staff ?? []).map((_: any, index: number) => (
+                      {(blocks.staff ?? []).map((_: any, index: number) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
@@ -297,7 +295,7 @@ const BlockDetailsPage: React.FC = () => {
         <div className="mb-8">
           <h3 className="text-xl font-semibold text-gray-900 mb-4">Ongoing Tasks</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {(blockData.ongoingTasks ?? []).map((task: { id: React.Key | null | undefined; name: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; assignedTo: string | any[]; progress: any; priority: string; startDate: any; endDate: any; }) => (
+            {(blocks.ongoingTasks ?? []).map((task: { id: React.Key | null | undefined; name: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; assignedTo: string | any[]; progress: any; priority: string; startDate: any; endDate: any; }) => (
               <Card
                 key={task.id}
                 className="cursor-pointer hover:shadow-lg transition-shadow"
@@ -351,7 +349,7 @@ const BlockDetailsPage: React.FC = () => {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={blockData.performanceHistory}>
+              <LineChart data={blocks.performanceHistory}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="period" />
                 <YAxis domain={[0, 100]} />
