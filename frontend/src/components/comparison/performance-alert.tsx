@@ -5,16 +5,19 @@
  */
 import React from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import blockData from "@/data/block-data";
 import { TrendingUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import type { Block } from "@/common/type";
+import { useBlock } from "@/contexts/block-context";
 
 interface PerformanceAlertProps {
   selectedBlocks: string[];
 }
 
-export const PerformanceAlert: React.FC<PerformanceAlertProps> = ({ selectedBlocks }) => (
+export const PerformanceAlert: React.FC<PerformanceAlertProps> = ({ selectedBlocks }) => {
+    const {blockData} = useBlock();
+  
+  return(
   <Card className="shadow-md">
     <CardHeader>
       <CardTitle className="flex items-center space-x-2">
@@ -107,3 +110,4 @@ export const PerformanceAlert: React.FC<PerformanceAlertProps> = ({ selectedBloc
     </CardContent>
   </Card>
 );
+}
