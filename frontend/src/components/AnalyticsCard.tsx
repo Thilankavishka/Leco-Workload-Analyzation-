@@ -24,6 +24,7 @@ interface PerfData {
 interface PieData {
   name: string;
   value: number;
+  [key: string]: any;
 }
 
 const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ blockId }) => {
