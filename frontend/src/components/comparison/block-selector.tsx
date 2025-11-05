@@ -5,14 +5,17 @@
  */
 import React from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import blockData from "@/data/block-data";
+import { useBlock } from "@/contexts/block-context";
 
 interface BlockSelectorProps {
   selectedBlocks: string[];
   toggleBlock: (id: string) => void;
 }
 
-export const BlockSelector: React.FC<BlockSelectorProps> = ({ selectedBlocks, toggleBlock }) => (
+export const BlockSelector: React.FC<BlockSelectorProps> = ({ selectedBlocks, toggleBlock }) => {
+  const {blockData} = useBlock();
+
+  return(
   <Card className="mb-8 shadow-md">
     <CardHeader>
       <CardTitle>Select Blocks to Compare</CardTitle>
@@ -41,4 +44,4 @@ export const BlockSelector: React.FC<BlockSelectorProps> = ({ selectedBlocks, to
       </div>
     </CardContent>
   </Card>
-);
+);}
