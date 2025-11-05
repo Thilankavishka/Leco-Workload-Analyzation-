@@ -1,25 +1,20 @@
+// src/components/Header.tsx
 import React from "react";
-import { Building2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Header: React.FC = () => {
+  const navigate = useNavigate();
+
   return (
-    <header className="bg-white shadow-sm border-b w-full">
-      <div className="w-full px-10 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <Building2 className="w-10 h-10 text-blue-600" />
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">LECO</h1>
-              <p className="text-sm text-gray-600">Project Management System</p>
-            </div>
-          </div>
-          <div className="text-right">
-            <p className="text-sm text-gray-600">Dashboard Overview</p>
-            <p className="text-xs text-gray-500">
-              Last updated: Today, 10:30 AM
-            </p>
-          </div>
-        </div>
+    <header className="bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg">
+      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+        <h1 className="text-2xl font-bold">LECO Workload Management</h1>
+        <button
+          onClick={() => navigate("/")}
+          className="bg-white text-blue-600 px-4 py-2 rounded-md hover:bg-gray-100 transition-colors"
+        >
+          Dashboard
+        </button>
       </div>
     </header>
   );
