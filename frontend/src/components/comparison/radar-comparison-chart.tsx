@@ -6,7 +6,7 @@
 import React from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend } from "recharts";
-import blockData from "@/data/block-data";
+import { useBlock } from "@/contexts/block-context";
 
 interface RadarComparisonChartProps {
   selectedBlocks: string[];
@@ -15,7 +15,10 @@ interface RadarComparisonChartProps {
 
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
 
-export const RadarComparisonChart: React.FC<RadarComparisonChartProps> = ({ selectedBlocks, radarData }) => (
+export const RadarComparisonChart: React.FC<RadarComparisonChartProps> = ({ selectedBlocks, radarData }) =>{
+  const {blockData} = useBlock();
+  
+  return(
   <Card className="mb-8 shadow-md">
     <CardHeader>
       <CardTitle>Multi-Dimensional Analysis</CardTitle>
@@ -46,3 +49,4 @@ export const RadarComparisonChart: React.FC<RadarComparisonChartProps> = ({ sele
     </CardContent>
   </Card>
 );
+}
