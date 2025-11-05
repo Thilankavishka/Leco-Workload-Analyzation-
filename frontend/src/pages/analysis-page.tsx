@@ -1,85 +1,58 @@
 /**
  * analysis-page.tsx
- *
+ * 
  * @update 11/05/2025
  */
-
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Filter, ChevronDown, Users, Car, Award, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MetricCard } from "@/components/analysis/metric-card";
-import axiosInstance from "@/common/axios-instance";
-import { apiSummary } from "@/common/summary-api";
-
-type Block = {
-  id: string;
-  name: string;
-  employeesCount: number;
-  vehiclesCount: number;
-  tasksCompleted: number;
-  tasksTotal: number;
-  performanceMonthly: number;
-  createdAt: string;
-  updatedAt: string;
-};
+import { useBlock } from "@/contexts/block-context";
 
 const AnalysisPage: React.FC = () => {
-  const [blocks, setBlocks] = useState<Block[]>([]);
+  const {blockData} = useBlock();
   const navigate = useNavigate();
   const { blockId } = useParams<{ blockId?: string }>();
-  const [selectedBlockId, setSelectedBlockId] = useState<string | null>(blockId || null);
-
-  // Fetch block data
-  const fetchBlockData = async () => {
-    try {
-      const response = await axiosInstance.get<Block[]>(apiSummary.blocks.getAll);
-      setBlocks(response.data);
-    } catch (error) {
-      console.error("Error fetching block data:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchBlockData();
-  }, []);
+  const [selectedBlock, setSelectedBlock] = useState<string | null>(blockId || null);
 
   const handleNavigate = () => {
-    if (selectedBlockId) navigate(`/block/${selectedBlockId}`);
+    if (selectedBlock) navigate(`/block/${selectedBlock}`);
   };
 
-  // Find selected block object
-  const selectedBlock = blocks.find((b) => b.id === selectedBlockId);
-
   // Prepare metrics dynamically
-  const metrics = selectedBlock
-    ? [
-        {
-          label: "Total Employees",
-          value: selectedBlock.employeesCount,
-          icon: <Users className="w-10 h-10 text-blue-600" />,
-        },
-        {
-          label: "Vehicles Assigned",
-          value: selectedBlock.vehiclesCount,
-          icon: <Car className="w-10 h-10 text-green-600" />,
-        },
-        {
-          label: "Tasks Completed",
-          value: `${selectedBlock.tasksCompleted}/${selectedBlock.tasksTotal}`,
-          icon: <Award className="w-10 h-10 text-purple-600" />,
-        },
-        {
-          label: "Completion Rate",
-          value: `${Math.round(
-            ((selectedBlock.tasksCompleted ?? 0) /
-              (selectedBlock.tasksTotal || 1)) *
-              100
-          )}%`,
-          icon: <TrendingUp className="w-10 h-10 text-orange-600" />,
-        },
-      ]
-    : [];
+  const metrics = (() => {
+    if (!selectedBlock) return [];
+    const block = blockData?.[selectedBlock];
+    const employeesCount = block?.employeesCount ?? 0;
+    const vehiclesCount = block?.vehiclesCount ?? 0;
+    const tasksCompleted = block?.tasksCompleted ?? 0;
+    const tasksTotal = block?.tasksTotal ?? 0;
+    const completionRate = tasksTotal > 0 ? Math.round((tasksCompleted / tasksTotal) * 100) : 0;
+
+    return [
+      {
+        label: "Total Employees",
+        value: employeesCount,
+        icon: <Users className="w-10 h-10 text-blue-600" />,
+      },
+      {
+        label: "Vehicles Assigned",
+        value: vehiclesCount,
+        icon: <Car className="w-10 h-10 text-green-600" />,
+      },
+      {
+        label: "Tasks Completed",
+        value: `${tasksCompleted}/${tasksTotal}`,
+        icon: <Award className="w-10 h-10 text-purple-600" />,
+      },
+      {
+        label: "Completion Rate",
+        value: `${completionRate}%`,
+        icon: <TrendingUp className="w-10 h-10 text-orange-600" />,
+      },
+    ];
+  })();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
@@ -111,14 +84,14 @@ const AnalysisPage: React.FC = () => {
             <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4">
               <div className="relative flex-1 w-full md:w-auto">
                 <select
-                  value={selectedBlockId || ""}
-                  onChange={(e) => setSelectedBlockId(e.target.value || null)}
+                  value={selectedBlock || ""}
+                  onChange={(e) => setSelectedBlock(e.target.value || null)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white"
                 >
                   <option value="">Choose a block...</option>
-                  {blocks.map((block) => (
-                    <option key={block.id} value={block.id}>
-                      {block.name}
+                  {Object.keys(blockData).map((key) => (
+                    <option key={key} value={key}>
+                      {blockData[key].name}
                     </option>
                   ))}
                 </select>
@@ -126,7 +99,7 @@ const AnalysisPage: React.FC = () => {
               </div>
               <button
                 onClick={handleNavigate}
-                disabled={!selectedBlockId}
+                disabled={!selectedBlock}
                 className="px-8 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-xl font-semibold transition-colors"
               >
                 Analyze
