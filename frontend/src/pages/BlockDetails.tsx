@@ -1,6 +1,6 @@
 // src/pages/BlockDetails.tsx
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import AnalyticsCard from "../components/AnalyticsCard";
 import EmployeeCard from "../components/EmployeeCard";
 import BlockPerformanceTrend from "../components/BlockPerformanceTrend";
@@ -13,6 +13,7 @@ const BlockDetails: React.FC = () => {
   const [employees, setEmployees] = useState<any[]>([]);
   const [tasks, setTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchDetails = async (): Promise<void> => {
@@ -174,7 +175,10 @@ const BlockDetails: React.FC = () => {
         </div>
 
         <div className="text-center">
-          <button className="bg-purple-600 text-white px-8 py-3 rounded-lg hover:bg-purple-700 transition-colors shadow-md font-medium text-lg">
+          <button
+            onClick={() => navigate(`/deep-comparison/${blockId}`)}
+            className="bg-purple-600 text-white px-8 py-3 rounded-lg hover:bg-purple-700 transition-colors shadow-md font-medium text-lg"
+          >
             Deep Comparison
           </button>
         </div>

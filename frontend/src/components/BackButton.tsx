@@ -20,7 +20,7 @@ const BackButton: React.FC<BackButtonProps> = ({ to }) => {
   return (
     <button
       onClick={handleBack}
-      className="fixed top-25 left-4 z-50 bg-white/90 backdrop-blur-sm text-gray-700 px-4 py-2 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 border border-gray-200 flex items-center gap-2"
+      className="fixed top-23 left-4 z-50 bg-white/90 backdrop-blur-sm text-gray-700 px-4 py-2 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 border border-gray-200 flex items-center gap-2"
     >
       <svg
         className="w-4 h-4"
