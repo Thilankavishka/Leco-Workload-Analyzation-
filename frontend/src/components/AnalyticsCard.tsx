@@ -10,7 +10,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { PieChart, Pie, Cell } from "recharts";
-import { employeeAPI } from "../services/api";
+import { employeeAPI, taskAPI } from "../services/api";
 
 interface AnalyticsCardProps {
   blockId: string;
@@ -24,7 +24,6 @@ interface PerfData {
 interface PieData {
   name: string;
   value: number;
-  [key: string]: any;
 }
 
 const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ blockId }) => {
@@ -34,8 +33,12 @@ const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ blockId }) => {
   useEffect(() => {
     const fetchAnalytics = async (): Promise<void> => {
       try {
-        const employeesRes = await employeeAPI.getByBlock(blockId);
+        const [employeesRes, tasksRes] = await Promise.all([
+          employeeAPI.getByBlock(blockId),
+          taskAPI.getByBlock(blockId),
+        ]);
         const employeesData = employeesRes.data;
+        const tasks = tasksRes.data;
 
         // Performance comparison data
         const perfData: PerfData[] = employeesData.map((emp: any) => ({
@@ -43,12 +46,14 @@ const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ blockId }) => {
           performance: emp.performance || 0,
         }));
 
-        // Task distribution pie data (mock - can be aggregated from tasks)
-        const pieData: PieData[] = [
-          { name: "High Priority", value: 40 },
-          { name: "Medium Priority", value: 30 },
-          { name: "Low Priority", value: 30 },
-        ];
+        // Use tasksAssigned from employee data for pie chart
+        const pieData: PieData[] = employeesData
+          .map((emp: any) => ({
+            name: emp.name,
+            value: emp.tasksAssigned || 0,
+          }))
+          .filter((item) => item.value > 0); // Filter out employees with 0 tasks
+
         setTaskDistData(pieData);
         setEmployees(employeesData);
       } catch (error) {
@@ -59,7 +64,18 @@ const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ blockId }) => {
     if (blockId) fetchAnalytics();
   }, [blockId]);
 
-  const COLORS = ["#0088FE", "#00C49F", "#FFBB28"];
+  const COLORS = [
+    "#0088FE",
+    "#00C49F",
+    "#FFBB28",
+    "#FF8042",
+    "#A855F7",
+    "#EC4899",
+    "#F59E0B",
+    "#10B981",
+    "#3B82F6",
+    "#EF4444",
+  ];
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md mb-6">
@@ -80,7 +96,9 @@ const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ blockId }) => {
           </ResponsiveContainer>
         </div>
         <div>
-          <h4 className="text-lg font-medium mb-2">Task Distribution</h4>
+          <h4 className="text-lg font-medium mb-2">
+            Task Distribution by Employee
+          </h4>
           <ResponsiveContainer width="100%" height={250}>
             <PieChart>
               <Pie
@@ -90,6 +108,8 @@ const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ blockId }) => {
                 outerRadius={80}
                 fill="#8884d8"
                 dataKey="value"
+                label={({ name, value }) => `${name}\n(${value} tasks)`}
+                labelLine={false}
               >
                 {taskDistData.map((entry, index) => (
                   <Cell
