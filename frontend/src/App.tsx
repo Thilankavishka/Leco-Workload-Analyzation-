@@ -12,18 +12,20 @@ import "./App.css";
 const App: React.FC = () => {
   return (
     <Router>
-      <div className="min-h-screen bg-gray-50">
+      <div className="w-screen h-screen flex flex-col bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 overflow-hidden">
         <Header />
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/analyzing" element={<Analyzing />} />
-          <Route path="/block-details/:blockId" element={<BlockDetails />} />
-          <Route
-            path="/deep-comparison/:blockId"
-            element={<DeepComparison />}
-          />
-          <Route path="/employee/:employeeId" element={<EmployeeDetails />} />
-        </Routes>
+        <div className="flex-1 overflow-y-auto">
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/analyzing" element={<Analyzing />} />
+            <Route path="/block-details/:blockId" element={<BlockDetails />} />
+            <Route
+              path="/deep-comparison/:blockId"
+              element={<DeepComparison />}
+            />
+            <Route path="/employee/:employeeId" element={<EmployeeDetails />} />
+          </Routes>
+        </div>
       </div>
     </Router>
   );
