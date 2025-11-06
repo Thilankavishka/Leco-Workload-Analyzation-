@@ -1,0 +1,59 @@
+-- ===== Insert More Blocks =====
+INSERT INTO Block (id, name, employeesCount, vehiclesCount, tasksCompleted, tasksTotal, performanceMonthly, createdAt, updatedAt)
+VALUES
+('blk_4', 'Block D - Coastal', 6, 4, 10, 12, 94, NOW(), NOW()),
+('blk_5', 'Block E - Highlands', 5, 2, 6, 9, 82, NOW(), NOW()),
+('blk_6', 'Block F - Suburban', 7, 3, 12, 15, 89, NOW(), NOW());
+
+-- ===== Insert More Employees =====
+INSERT INTO Employee (id, name, phone, role, performance, tasksCompleted, tasksAssigned, blockId, createdAt, updatedAt)
+VALUES
+('emp_6', 'Tharindu Jayasinghe', '0773344556', 'Field Engineer', 92, 7, 8, 'blk_4', NOW(), NOW()),
+('emp_7', 'Ishara Madushani', '0711122233', 'Surveyor', 87, 5, 6, 'blk_4', NOW(), NOW()),
+('emp_8', 'Manoj Rathnayake', '0759988776', 'Technician', 83, 4, 5, 'blk_4', NOW(), NOW()),
+('emp_9', 'Sithmi Karunarathna', '0768899775', 'Safety Officer', 90, 6, 6, 'blk_5', NOW(), NOW()),
+('emp_10', 'Lahiru Dissanayake', '0726655443', 'Driver', 78, 3, 5, 'blk_5', NOW(), NOW()),
+('emp_11', 'Chathura Abeysekara', '0719988774', 'Electrician', 85, 5, 6, 'blk_6', NOW(), NOW()),
+('emp_12', 'Kaveesha Udayanga', '0776677889', 'Plumber', 80, 3, 5, 'blk_6', NOW(), NOW()),
+('emp_13', 'Sanduni Jayawardena', '0703344556', 'Assistant Engineer', 88, 5, 7, 'blk_6', NOW(), NOW());
+
+-- ===== Insert More Tasks =====
+INSERT INTO Task (id, name, progress, priority, startDate, endDate, blockId, createdAt, updatedAt)
+VALUES
+('tsk_6', 'Drainage System Upgrade', 95, 'HIGH', '2025-09-25', '2025-10-10', 'blk_4', NOW(), NOW()),
+('tsk_7', 'Seaside Road Maintenance', 80, 'MEDIUM', '2025-10-12', NULL, 'blk_4', NOW(), NOW()),
+('tsk_8', 'Telecom Cable Installation', 100, 'HIGH', '2025-09-01', '2025-09-20', 'blk_5', NOW(), NOW()),
+('tsk_9', 'Highland Bridge Inspection', 65, 'LOW', '2025-10-01', NULL, 'blk_5', NOW(), NOW()),
+('tsk_10', 'Suburban Park Lighting', 70, 'MEDIUM', '2025-09-28', NULL, 'blk_6', NOW(), NOW()),
+('tsk_11', 'Community Center Repair', 100, 'HIGH', '2025-08-15', '2025-09-01', 'blk_6', NOW(), NOW()),
+('tsk_12', 'Suburban Drainage Check', 55, 'LOW', '2025-10-05', NULL, 'blk_6', NOW(), NOW());
+
+-- ===== Insert More Task Assignments =====
+INSERT INTO TaskAssignment (id, taskId, employeeId)
+VALUES
+('ta_8', 'tsk_6', 'emp_6'),
+('ta_9', 'tsk_6', 'emp_7'),
+('ta_10', 'tsk_7', 'emp_7'),
+('ta_11', 'tsk_7', 'emp_8'),
+('ta_12', 'tsk_8', 'emp_9'),
+('ta_13', 'tsk_8', 'emp_10'),
+('ta_14', 'tsk_9', 'emp_10'),
+('ta_15', 'tsk_10', 'emp_11'),
+('ta_16', 'tsk_10', 'emp_13'),
+('ta_17', 'tsk_11', 'emp_11'),
+('ta_18', 'tsk_11', 'emp_12'),
+('ta_19', 'tsk_12', 'emp_12'),
+('ta_20', 'tsk_12', 'emp_13');
+
+-- ===== Insert More Performance History =====
+INSERT INTO PerformanceHistory (id, period, value, blockId)
+VALUES
+('ph_9', 'Week 1', 93, 'blk_4'),
+('ph_10', 'Week 2', 94, 'blk_4'),
+('ph_11', 'Week 3', 96, 'blk_4'),
+('ph_12', 'Week 1', 80, 'blk_5'),
+('ph_13', 'Week 2', 82, 'blk_5'),
+('ph_14', 'Week 3', 85, 'blk_5'),
+('ph_15', 'Week 1', 87, 'blk_6'),
+('ph_16', 'Week 2', 89, 'blk_6'),
+('ph_17', 'Week 3', 91, 'blk_6');

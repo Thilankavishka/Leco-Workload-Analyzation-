@@ -6,15 +6,14 @@ import Analyzing from "./pages/Analyzing.tsx";
 import BlockDetails from "./pages/BlockDetails.tsx";
 import DeepComparison from "./pages/DeepComparison.tsx";
 import EmployeeDetails from "./pages/EmployeeDetails.tsx";
-import Header from "./components/Header.tsx";
 import "./App.css";
+import Header from "./components/header.tsx";
 
 const App: React.FC = () => {
   return (
     <Router>
-      <div className="w-screen h-screen flex flex-col bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 overflow-hidden">
-        <Header />
-        <div className="flex-1 overflow-y-auto">
+      <div >
+        <div className="">
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/analyzing" element={<Analyzing />} />

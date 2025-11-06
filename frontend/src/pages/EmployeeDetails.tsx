@@ -171,11 +171,10 @@ const EmployeeDetails: React.FC = () => {
                   <p className="text-sm text-gray-600 mb-1">
                     <span className="font-medium">Status:</span>{" "}
                     <span
-                      className={`px-2 py-1 rounded-full text-xs ${
-                        status === "Completed"
+                      className={`px-2 py-1 rounded-full text-xs ${status === "Completed"
                           ? "bg-green-100 text-green-800"
                           : "bg-yellow-100 text-yellow-800"
-                      }`}
+                        }`}
                     >
                       {status}
                     </span>
