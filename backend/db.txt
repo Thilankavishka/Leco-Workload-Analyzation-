@@ -57,3 +57,7 @@ VALUES
 ('ph_15', 'Week 1', 87, 'blk_6'),
 ('ph_16', 'Week 2', 89, 'blk_6'),
 ('ph_17', 'Week 3', 91, 'blk_6');
+
+
+DATABASE_URL="mysql://root@localhost:3306/newleco"
+DATABASE_DIRECT_URL="mysql://root@localhost:3306/newleco"
