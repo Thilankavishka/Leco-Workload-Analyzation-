@@ -4,12 +4,10 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
-
 /**
-  * schema.prisma
-  * 
-  * @update 11/03/2025
-  */
+ * schema.prisma
+ * @update 11/03/2025
+ */
 
 generator client {
   provider        = "prisma-client-js"
@@ -18,7 +16,7 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  url      = env("DATABASE_URL")
+  url      = env("PRISMA_DATABASE_URL")
 }
 
 // Priority Enum
@@ -120,4 +118,3 @@ model PerformanceHistory {
   blockId String // Foreign key linking to Block
   block   Block  @relation(fields: [blockId], references: [id]) // Each record belongs to one block
 }
-
