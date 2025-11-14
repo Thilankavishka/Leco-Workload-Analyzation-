@@ -13,6 +13,7 @@ const App: React.FC = () => {
   return (
     <Router>
       <div >
+        <Header />
         <div className="">
           <Routes>
             <Route path="/" element={<Dashboard />} />

@@ -57,7 +57,8 @@ const EmployeeDetails: React.FC = () => {
         const trendData = Object.entries(monthlyAvg)
           .map(([month, stats]) => ({
             month,
-            performance: Math.round(stats.total / stats.count),
+            performance: Math.round((stats as { total: number; count: number }).total /
+              (stats as { total: number; count: number }).count),
           }))
           .sort(
             (a, b) => new Date(a.month).getTime() - new Date(b.month).getTime()
@@ -172,8 +173,8 @@ const EmployeeDetails: React.FC = () => {
                     <span className="font-medium">Status:</span>{" "}
                     <span
                       className={`px-2 py-1 rounded-full text-xs ${status === "Completed"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-yellow-100 text-yellow-800"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-yellow-100 text-yellow-800"
                         }`}
                     >
                       {status}

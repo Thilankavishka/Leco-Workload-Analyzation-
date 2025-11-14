@@ -1,6 +1,6 @@
 // src/pages/DeepComparison.tsx
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import ComparisonChart from "../components/ComparisonChart";
 import BackButton from "../components/BackButton";
 import { blockAPI } from "../services/api";
@@ -50,8 +50,8 @@ const DeepComparison: React.FC = () => {
             compare: compare.performanceMonthly || 0,
           },
           taskCompletion: {
-            current: parseFloat(taskCompletionCurrent),
-            compare: parseFloat(taskCompletionCompare),
+            current: taskCompletionCurrent,
+            compare: taskCompletionCompare,
           },
           employees: {
             current: current.employeesCount || 0,
@@ -71,7 +71,7 @@ const DeepComparison: React.FC = () => {
         const perfDiff =
           (current.performanceMonthly || 0) - (compare.performanceMonthly || 0);
         const taskDiff =
-          parseFloat(taskCompletionCurrent) - parseFloat(taskCompletionCompare);
+          Number(taskCompletionCurrent) - Number(taskCompletionCompare);
         let insightText = `Compared to ${compare.name}, your block (${current.name}) `;
         if (perfDiff > 0) {
           insightText += `excels in overall performance by ${perfDiff.toFixed(
@@ -171,16 +171,15 @@ const DeepComparison: React.FC = () => {
                         {comparisonMetrics.performance.compare}%
                       </td>
                       <td
-                        className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${
-                          comparisonMetrics.performance.current >
+                        className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${comparisonMetrics.performance.current >
                           comparisonMetrics.performance.compare
-                            ? "text-green-600"
-                            : "text-red-600"
-                        }`}
+                          ? "text-green-600"
+                          : "text-red-600"
+                          }`}
                       >
                         {comparisonMetrics.performance.current -
                           comparisonMetrics.performance.compare >
-                        0
+                          0
                           ? "+"
                           : ""}
                         {comparisonMetrics.performance.current -
@@ -199,16 +198,15 @@ const DeepComparison: React.FC = () => {
                         {comparisonMetrics.taskCompletion.compare}%
                       </td>
                       <td
-                        className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${
-                          comparisonMetrics.taskCompletion.current >
+                        className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${comparisonMetrics.taskCompletion.current >
                           comparisonMetrics.taskCompletion.compare
-                            ? "text-green-600"
-                            : "text-red-600"
-                        }`}
+                          ? "text-green-600"
+                          : "text-red-600"
+                          }`}
                       >
                         {comparisonMetrics.taskCompletion.current -
                           comparisonMetrics.taskCompletion.compare >
-                        0
+                          0
                           ? "+"
                           : ""}
                         {comparisonMetrics.taskCompletion.current -
@@ -227,16 +225,15 @@ const DeepComparison: React.FC = () => {
                         {comparisonMetrics.employees.compare}
                       </td>
                       <td
-                        className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${
-                          comparisonMetrics.employees.current >
+                        className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${comparisonMetrics.employees.current >
                           comparisonMetrics.employees.compare
-                            ? "text-green-600"
-                            : "text-red-600"
-                        }`}
+                          ? "text-green-600"
+                          : "text-red-600"
+                          }`}
                       >
                         {comparisonMetrics.employees.current -
                           comparisonMetrics.employees.compare >
-                        0
+                          0
                           ? "+"
                           : ""}
                         {comparisonMetrics.employees.current -
@@ -254,16 +251,15 @@ const DeepComparison: React.FC = () => {
                         {comparisonMetrics.vehicles.compare}
                       </td>
                       <td
-                        className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${
-                          comparisonMetrics.vehicles.current >
+                        className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${comparisonMetrics.vehicles.current >
                           comparisonMetrics.vehicles.compare
-                            ? "text-green-600"
-                            : "text-red-600"
-                        }`}
+                          ? "text-green-600"
+                          : "text-red-600"
+                          }`}
                       >
                         {comparisonMetrics.vehicles.current -
                           comparisonMetrics.vehicles.compare >
-                        0
+                          0
                           ? "+"
                           : ""}
                         {comparisonMetrics.vehicles.current -
@@ -281,16 +277,15 @@ const DeepComparison: React.FC = () => {
                         {comparisonMetrics.ongoingTasks.compare}
                       </td>
                       <td
-                        className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${
-                          comparisonMetrics.ongoingTasks.current <
+                        className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${comparisonMetrics.ongoingTasks.current <
                           comparisonMetrics.ongoingTasks.compare
-                            ? "text-green-600"
-                            : "text-red-600"
-                        }`}
+                          ? "text-green-600"
+                          : "text-red-600"
+                          }`}
                       >
                         {comparisonMetrics.ongoingTasks.current -
                           comparisonMetrics.ongoingTasks.compare >
-                        0
+                          0
                           ? "+"
                           : ""}
                         {comparisonMetrics.ongoingTasks.current -

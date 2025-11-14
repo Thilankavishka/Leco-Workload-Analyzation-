@@ -16,11 +16,6 @@ interface AnalyticsCardProps {
   blockId: string;
 }
 
-interface PerfData {
-  name: string;
-  performance: number;
-}
-
 interface PieData {
   name: string;
   value: number;
@@ -34,18 +29,18 @@ const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ blockId }) => {
   useEffect(() => {
     const fetchAnalytics = async (): Promise<void> => {
       try {
-        const [employeesRes, tasksRes] = await Promise.all([
+        const [employeesRes] = await Promise.all([
           employeeAPI.getByBlock(blockId),
           taskAPI.getByBlock(blockId),
         ]);
         const employeesData = employeesRes.data;
-        const tasks = tasksRes.data;
+        // const tasks = tasksRes.data;
 
         // Performance comparison data
-        const perfData: PerfData[] = employeesData.map((emp: any) => ({
-          name: emp.name,
-          performance: emp.performance || 0,
-        }));
+        // const perfData: PerfData[] = employeesData.map((emp: any) => ({
+        //   name: emp.name,
+        //   performance: emp.performance || 0,
+        // }));
 
         // Use tasksAssigned from employee data for pie chart
         const pieData: PieData[] = employeesData
@@ -53,7 +48,7 @@ const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ blockId }) => {
             name: emp.name,
             value: emp.tasksAssigned || 0,
           }))
-          .filter((item) => item.value > 0); // Filter out employees with 0 tasks
+          .filter((item: any) => item.value > 0); // Filter out employees with 0 tasks
 
         setTaskDistData(pieData);
         setEmployees(employeesData);
@@ -112,7 +107,7 @@ const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ blockId }) => {
                 label={({ name, value }) => `${name}\n(${value} tasks)`}
                 labelLine={false}
               >
-                {taskDistData.map((entry, index) => (
+                {taskDistData.map((_, index) => (
                   <Cell
                     key={`cell-${index}`}
                     fill={COLORS[index % COLORS.length]}
