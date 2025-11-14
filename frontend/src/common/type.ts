@@ -1,8 +1,9 @@
+export type Priority = "HIGH" | "MEDIUM" | "LOW" | "high" | "medium" | "low"
+
 export interface Task {
   id: string;
   name: string;
   progress: number;
-  priority: "low" | "medium" | "high";
   assignedTo: string[];
   startDate: string;
   endDate?: string | null;
@@ -22,3 +23,4 @@ export interface Block {
   staff: Employee[];
   ongoingTasks: Task[];
 }
+

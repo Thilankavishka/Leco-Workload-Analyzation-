@@ -1,0 +1,123 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+
+/**
+  * schema.prisma
+  * 
+  * @update 11/03/2025
+  */
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["strictUndefinedChecks"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// Priority Enum
+// Defines priority levels for tasks.
+enum Priority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+// Block Model
+// Represents a geographic or functional block (Urban, Rural, Industrial, etc.)
+model Block {
+  id   String @id @default(cuid()) // Unique identifier for each block
+  name String // Block name (e.g., "Block A - Urban")
+
+  employeesCount Int? // Total number of employees in the block
+  vehiclesCount  Int? // Total number of vehicles assigned to the block
+
+  tasksCompleted Int? // Number of completed tasks
+  tasksTotal     Int? // Total number of tasks (completed + ongoing)
+
+  performanceMonthly Int? // Monthly performance score (%)
+
+  // Relationships
+  performanceHistory PerformanceHistory[] // Weekly/monthly performance records
+  ongoingTasks       Task[] // List of ongoing and completed tasks in this block
+  staff              Employee[] // All employees belonging to this block
+
+  createdAt DateTime @default(now()) // Record creation timestamp
+  updatedAt DateTime @updatedAt // Auto-updated whenever record changes
+}
+
+// Task Model
+// Represents a single task or project assigned to employees in a block.
+// Each task belongs to one Block and can have multiple assigned Employees.
+model Task {
+  id        String    @id @default(cuid()) // Unique identifier for the task
+  name      String // Task name or title
+  progress  Int? // Task completion percentage (0–100)
+  priority  Priority? // Task urgency: HIGH, MEDIUM, LOW
+  startDate DateTime // Date task started
+  endDate   DateTime? // Null if task is ongoing
+
+  // Relationships
+  blockId String // Foreign key linking to Block
+  block   Block  @relation(fields: [blockId], references: [id]) // Each task belongs to one block
+
+  assignedTo TaskAssignment[] // Many-to-many relation to Employee via TaskAssignment
+
+  createdAt DateTime @default(now()) // Created timestamp
+  updatedAt DateTime @updatedAt // Updated timestamp
+}
+
+// Employee Model
+// Represents a staff member working under a specific block.
+// Employees can be assigned multiple tasks via TaskAssignment.
+model Employee {
+  id             String  @id @default(cuid()) // Unique employee ID
+  name           String // Employee full name
+  phone          String? // Contact number
+  role           String? // Job title or position (Engineer, Technician, etc.)
+  performance    Int? // Overall performance score (0–100)
+  tasksCompleted Int? // Number of completed tasks
+  tasksAssigned  Int? // Total number of assigned tasks
+
+  // Relationships
+  blockId String // Foreign key linking to Block
+  block   Block  @relation(fields: [blockId], references: [id]) // Each employee belongs to one block
+
+  taskAssignments TaskAssignment[] // Many-to-many link with Task through TaskAssignment
+
+  createdAt DateTime @default(now()) // Created timestamp
+  updatedAt DateTime @updatedAt // Auto-updated timestamp
+}
+
+// TaskAssignment Model
+// Bridge table for many-to-many relationship between Task and Employee.
+// Prevents duplicate task assignments to the same employee.
+model TaskAssignment {
+  id         String @id @default(cuid()) // Unique assignment ID
+  taskId     String // Foreign key to Task
+  employeeId String // Foreign key to Employee
+
+  // Relationships
+  task     Task     @relation(fields: [taskId], references: [id]) // Task reference
+  employee Employee @relation(fields: [employeeId], references: [id]) // Employee reference
+
+  @@unique([taskId, employeeId]) // Prevent duplicate task-employee pairs
+}
+
+// PerformanceHistory Model
+// Tracks performance trends (e.g., weekly or monthly scores) for each block.
+model PerformanceHistory {
+  id     String  @id @default(cuid()) // Unique record ID
+  period String? // Time period (e.g., "Week 1", "Month 3")
+  value  Int? // Performance score value for the period
+
+  blockId String // Foreign key linking to Block
+  block   Block  @relation(fields: [blockId], references: [id]) // Each record belongs to one block
+}
+
