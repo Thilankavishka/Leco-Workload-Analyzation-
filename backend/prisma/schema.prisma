@@ -15,7 +15,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("PRISMA_DATABASE_URL")
 }
 
