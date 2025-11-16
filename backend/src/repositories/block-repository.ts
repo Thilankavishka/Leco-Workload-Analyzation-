@@ -35,6 +35,15 @@ export const createBlock = async (data: any) => {
     return await prisma.block.create({ data });
 };
 
+// Create multiple blocks in bulk
+export const createBlocksBulk = async (blocks: any[]) => {
+  return await prisma.block.createMany({
+    data: blocks,
+    skipDuplicates: true, // Optional: avoid errors if IDs already exist
+  });
+};
+
+
 // Update a block
 export const updateBlock = async (id: string, data: any) => {
     return await prisma.block.update({
