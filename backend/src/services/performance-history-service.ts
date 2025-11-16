@@ -1,7 +1,7 @@
 /**
  * performance-history-service.ts
  * 
- * @updated 11/03/2025
+ * @updated 11/16/2025
  */
 
 import * as performanceHistoryRepository from "../repositories/performance-history-repository";
@@ -23,6 +23,10 @@ export const getByBlock = async (blockId: string) => performanceHistoryRepositor
 export const create = async (data: any) => {
   if (!data.blockId) throw new Error("blockId is required");
   return await performanceHistoryRepository.createPerformanceRecord(data);
+};
+
+export const createRecordsBulk = async (records: any[]) => {
+  return await performanceHistoryRepository.createPerformanceRecordsBulk(records);
 };
 
 // Update a performance record
