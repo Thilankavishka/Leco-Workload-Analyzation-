@@ -38,6 +38,19 @@ router.post("/", async (req: Request, res: Response) => {
     }
 });
 
+// Bulk create blocks
+router.post("/bulk", async (req: Request, res: Response) => {
+  try {
+    const result = await BlockService.createBlocksBulk(req.body);
+    res.status(201).json({
+      message: "Blocks created successfully",
+      ...result, // includes: count
+    });
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 // Update block
 router.put("/:id", async (req: Request, res: Response) => {
     try {
