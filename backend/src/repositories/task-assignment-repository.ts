@@ -43,6 +43,14 @@ export const createAssignment = async (data: any) => {
   return await prisma.taskAssignment.create({ data });
 };
 
+// Bulk create task assignments
+export const createAssignmentsBulk = async (assignments: any[]) => {
+  return await prisma.taskAssignment.createMany({
+    data: assignments,
+    skipDuplicates: true, // avoid duplicate task-employee pairs
+  });
+};
+
 // Update a task assignment
 export const deleteAssignment = async (id: string) => {
   return await prisma.taskAssignment.delete({ where: { id } });
