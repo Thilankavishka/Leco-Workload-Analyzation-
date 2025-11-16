@@ -1,7 +1,7 @@
 /**
  * task-repository.ts
  * 
- * @updated 11/03/2025
+ * @updated 11/16/2025
  */
 
 import prismaClient from "../utils/prisma-client";
@@ -40,6 +40,14 @@ export const getTaskById = async (id: string) => {
 // Create a new task
 export const createTask = async (data: any) => {
     return await prisma.task.create({ data });
+};
+
+// Bulk create tasks
+export const createTasksBulk = async (tasks: any[]) => {
+    return await prisma.task.createMany({
+        data: tasks,
+        skipDuplicates: true, // optional
+    });
 };
 
 // Update a task
