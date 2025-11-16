@@ -44,10 +44,18 @@ export const createTask = async (data: any) => {
 
 // Bulk create tasks
 export const createTasksBulk = async (tasks: any[]) => {
-    return await prisma.task.createMany({
-        data: tasks,
-        skipDuplicates: true, // optional
-    });
+  const formattedTasks = tasks.map(task => ({
+    ...task,
+    startDate: new Date(task.startDate),
+    endDate: task.endDate ? new Date(task.endDate) : null,
+    createdAt: new Date(task.createdAt),
+    updatedAt: new Date(task.updatedAt),
+  }));
+
+  return await prisma.task.createMany({
+    data: formattedTasks,
+    skipDuplicates: true,
+  });
 };
 
 // Update a task
