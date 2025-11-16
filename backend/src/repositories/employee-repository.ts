@@ -1,7 +1,7 @@
 /**
  * employee-repository.ts
  * 
- * @updated 11/03/2025
+ * @updated 11/16/2025
  */
 import prismaClient from "../utils/prisma-client";
 
@@ -35,6 +35,14 @@ export const getEmployeeById = async (id: string) => {
 export const createEmployee = async (data: any) => {
   return await prisma.employee.create({
     data,
+  });
+};
+
+// Bulk create employees
+export const createEmployeesBulk = async (employees: any[]) => {
+  return await prisma.employee.createMany({
+    data: employees,
+    skipDuplicates: true, // optional: avoid duplicate IDs
   });
 };
 
