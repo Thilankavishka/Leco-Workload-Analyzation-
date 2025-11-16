@@ -27,27 +27,17 @@ router.get("/block/:blockId", async (req: Request, res: Response) => {
   res.json(data);
 });
 
--// Single create
+// CREATE
 router.post("/", async (req: Request, res: Response) => {
-  try {
-    const data = await performanceHistoryService.create(req.body);
-    res.status(201).json(data);
-  } catch (error: any) {
-    console.error("Single create error:", error);
-    res.status(400).json({ message: error.message });
-  }
+  const data = await performanceHistoryService.create(req.body);
+  res.status(201).json(data);
 });
 
-// Bulk create
+// Bulk create performance records
 router.post("/bulk", async (req: Request, res: Response) => {
-  try {
-    const records = req.body;
-    const result = await performanceHistoryService.createRecordsBulk(records);
-    res.status(201).json({ message: "Records created", createdCount: result.count });
-  } catch (error: any) {
-    console.error("Bulk create error:", error);
-    res.status(400).json({ message: error.message });
-  }
+  const records = req.body; // Expecting an array of objects
+  const result = await performanceHistoryService.createRecordsBulk(records);
+  res.status(201).json(result);
 });
 
 // UPDATE
