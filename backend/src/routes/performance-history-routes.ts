@@ -33,6 +33,13 @@ router.post("/", async (req: Request, res: Response) => {
   res.status(201).json(data);
 });
 
+// Bulk create performance records
+router.post("/bulk", async (req: Request, res: Response) => {
+  const records = req.body; // Expecting an array of objects
+  const result = await performanceHistoryService.createRecordsBulk(records);
+  res.status(201).json(result);
+});
+
 // UPDATE
 router.put("/:id", async (req: Request, res: Response) => {
   const data = await performanceHistoryService.update(req.params.id, req.body);
