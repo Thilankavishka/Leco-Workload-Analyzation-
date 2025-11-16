@@ -3,6 +3,7 @@
  * 
  * @updated 11/16/2025
  */
+import { PerformanceHistoryModel } from "../models/performance-model";
 import prismaClient from "../utils/prisma-client";
 
 const prisma = prismaClient;
@@ -30,36 +31,17 @@ export const getPerformanceByBlockId = async (blockId: string) => {
   });
 };
 
+// Create a new performance record
 export const createPerformanceRecord = async (data: any) => {
-  if (!data.blockId) throw new Error("blockId is required");
-
-  const record = {
-    period: data.period || null,
-    value: typeof data.value === "number" ? data.value : null,
-    blockId: data.blockId,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
-
-  return await prisma.performanceHistory.create({ data: record });
+  return await prisma.performanceHistory.create({ data });
 };
 
-// Bulk create
+// Bulk create performance records
 export const createPerformanceRecordsBulk = async (records: any[]) => {
-  const formattedRecords = records
-    .filter(r => r.blockId)
-    .map(r => ({
-      period: r.period || null,
-      value: typeof r.value === "number" ? r.value : null,
-      blockId: r.blockId,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }));
-
-  if (formattedRecords.length === 0) throw new Error("No valid records to insert");
+  const validatedRecords = records.map(r => PerformanceHistoryModel.parse(r));
 
   return await prisma.performanceHistory.createMany({
-    data: formattedRecords,
+    data: validatedRecords,
     skipDuplicates: true,
   });
 };
