@@ -22,6 +22,15 @@ export const createBlock = async (data: any) => {
     return await BlockRepository.createBlock(data);
 };
 
+// Bulk create blocks
+export const createBlocksBulk = async (blocks: any[]) => {
+  if (!Array.isArray(blocks)) {
+    throw new Error("Bulk data must be an array.");
+  }
+
+  return await BlockRepository.createBlocksBulk(blocks);
+};
+
 // update a block
 export const updateBlock = async (id: string, data: any) => {
     const existing = await BlockRepository.getBlockById(id);
