@@ -40,8 +40,15 @@ export const createEmployee = async (data: any) => {
 
 // Bulk create employees
 export const createEmployeesBulk = async (employees: any[]) => {
+  // Map employees to ensure createdAt/updatedAt are proper Date objects
+  const formattedEmployees = employees.map(emp => ({
+    ...emp,
+    createdAt: new Date(emp.createdAt),
+    updatedAt: new Date(emp.updatedAt),
+  }));
+
   return await prisma.employee.createMany({
-    data: employees,
+    data: formattedEmployees,
     skipDuplicates: true, // optional: avoid duplicate IDs
   });
 };
