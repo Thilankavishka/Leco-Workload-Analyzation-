@@ -22,6 +22,14 @@ export const createEmployee = async (data: any) => {
   return await EmployeeRepository.createEmployee(data);
 };
 
+// Bulk create employees
+export const createEmployeesBulk = async (employees: any[]) => {
+  if (!Array.isArray(employees)) {
+    throw new Error("Bulk data must be an array.");
+  }
+  return await EmployeeRepository.createEmployeesBulk(employees);
+};
+
 // Update employee by ID
 export const updateEmployee = async (id: string, data: any) => {
   const existing = await EmployeeRepository.getEmployeeById(id);
