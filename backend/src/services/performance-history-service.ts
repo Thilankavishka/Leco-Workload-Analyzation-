@@ -25,7 +25,6 @@ export const create = async (data: any) => {
   return await performanceHistoryRepository.createPerformanceRecord(data);
 };
 
-// Bulk create performance records
 export const createRecordsBulk = async (records: any[]) => {
   if (!Array.isArray(records) || records.length === 0)
     throw new Error("Input must be a non-empty array");
