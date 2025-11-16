@@ -29,5 +29,13 @@ export const create = async (data: any) => {
   return await taskAssignmentRepository.createAssignment(data);
 };
 
+// Bulk create assignments
+export const createAssignmentsBulk = async (assignments: any[]) => {
+  if (!Array.isArray(assignments)) {
+    throw new Error("Bulk data must be an array.");
+  }
+  return await taskAssignmentRepository.createAssignmentsBulk(assignments);
+};
+
 // Delete a task assignment
 export const remove = async (id: string) => taskAssignmentRepository.deleteAssignment(id);
