@@ -1,7 +1,7 @@
 /**
  * task-service.ts
  * 
- * @updated 11/03/2025
+ * @updated 11/16/2025
  */
 import * as TaskRepository from "../repositories/task-repository";
 
@@ -20,6 +20,14 @@ export const getTaskById = async (id: string) => {
 // Create a new task
 export const createTask = async (data: any) => {
     return await TaskRepository.createTask(data);
+};
+
+// Bulk create tasks
+export const createTasksBulk = async (tasks: any[]) => {
+    if (!Array.isArray(tasks)) {
+        throw new Error("Bulk data must be an array.");
+    }
+    return await TaskRepository.createTasksBulk(tasks);
 };
 
 // Update a task
